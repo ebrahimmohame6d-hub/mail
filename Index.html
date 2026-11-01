@@ -27,7 +27,6 @@ body{
 @keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.5)}70%{box-shadow:0 0 0 14px rgba(56,189,248,0)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
 /* الهيدر */
 .topbar{
@@ -36,11 +35,11 @@ body{
   border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10;
   animation:fadeUp .5s ease both;
 }
-.brand{font-weight:bold; font-size:20px; background:linear-gradient(90deg,var(--acc),var(--acc2)); -webkit-background-clip:text; color:transparent}
+.brand{font-weight:bold; font-size:20px; background:linear-gradient(90deg,var(--acc),var(--acc2)); -webkit-background-clip:text; background-clip:text; color:transparent}
 .tabs{display:flex; gap:6px; background:rgba(255,255,255,.05); padding:4px; border-radius:12px}
 .tab{
   border:0; background:transparent; color:var(--muted); padding:8px 16px; border-radius:9px;
-  cursor:pointer; font-size:15px; transition:all .3s;
+  cursor:pointer; font-size:15px; transition:all .3s; font-family:inherit;
 }
 .tab.active{background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#0f172a; font-weight:bold; box-shadow:0 4px 14px rgba(56,189,248,.35)}
 .tab:not(.active):hover{color:var(--text); background:rgba(255,255,255,.06)}
@@ -71,21 +70,19 @@ main{max-width:980px; margin:24px auto; padding:0 16px}
 .form .full{grid-column:1/-1}
 input,select{
   width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
-  background:rgba(15,23,42,.6); color:var(--text); font-size:15px; outline:none; transition:all .25s;
+  background:rgba(15,23,42,.6); color:var(--text); font-size:15px; outline:none; transition:all .25s; font-family:inherit;
 }
 input:focus,select:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); transform:translateY(-1px)}
 select option{background:#0f172a}
-button{font-family:inherit}
 .primary{
-  width:100%; padding:13px; border:0; border-radius:12px; cursor:pointer; font-size:16px; font-weight:bold;
+  width:100%; padding:13px; border:0; border-radius:12px; cursor:pointer; font-size:16px; font-weight:bold; font-family:inherit;
   color:#0f172a; background:linear-gradient(90deg,var(--acc),var(--acc2)); transition:transform .15s, filter .3s;
-  position:relative; overflow:hidden;
 }
 .primary:hover{filter:brightness(1.1); animation:pulse 1.5s infinite}
 .primary:active{transform:scale(.97)}
 .primary:disabled{opacity:.6; cursor:wait}
 .small{
-  padding:11px 16px; border:0; border-radius:11px; cursor:pointer; font-weight:bold; white-space:nowrap;
+  padding:11px 16px; border:0; border-radius:11px; cursor:pointer; font-weight:bold; white-space:nowrap; font-family:inherit;
   color:#0f172a; background:linear-gradient(90deg,var(--ok),var(--acc)); transition:transform .15s;
 }
 .small:hover{transform:translateY(-2px)}
@@ -150,8 +147,7 @@ button{font-family:inherit}
 /* موبايل */
 @media (max-width:700px){
   .form{grid-template-columns:1fr}
-  .loan-row{grid-template-columns:1fr 1fr; }
-  .lr-notes,.lr-time{grid-column:span 1}
+  .loan-row{grid-template-columns:1fr 1fr}
   .drow{grid-template-columns:1fr 1fr}
   .addname input{width:120px}
   .big{font-size:32px}
@@ -175,7 +171,6 @@ button{font-family:inherit}
 <div id="toasts"></div>
 
 <main>
-  <!-- الصفحة الأساسية -->
   <section class="page active" id="page-main">
     <div class="card clock">
       <div id="clockDay"></div>
@@ -210,7 +205,6 @@ button{font-family:inherit}
     </div>
   </section>
 
-  <!-- صفحة التفاصيل -->
   <section class="page" id="page-details">
     <div class="card picker">
       <label style="color:var(--muted)">اختار الاسم:</label>
@@ -221,8 +215,10 @@ button{font-family:inherit}
 </main>
 
 <script>
+/* ⬇️ حط هنا رابط الـ Web app بتاعك (/exec) */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyVryYDMSeSo7vvJNOyamVjRut5-A84WMhYa8J5s-UpVrsOM-eh4WE9Vw95H1yJYdDWMQ/exec';
+
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-let names = [];
 let currentMonth = '';
 
 function $(id){ return document.getElementById(id); }
@@ -241,7 +237,7 @@ function toast(msg, type){
   setTimeout(() => t.remove(), 3000);
 }
 function showErr(err){
-  toast((err && err.message) ? err.message.replace(/^Error:\s*/,'') : 'حصل خطأ', 'err');
+  toast((err && err.message) ? err.message : 'حصل خطأ', 'err');
 }
 
 function countUp(el, target){
@@ -261,6 +257,17 @@ function tick(){
   $('clockTime').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
+/* ----- الاتصال بالـ Apps Script ----- */
+function api(action, params = {}){
+  const q = new URLSearchParams({ action, ...params });
+  return fetch(API_URL + '?' + q.toString())
+    .then(r => r.json())
+    .then(j => {
+      if (!j.ok) throw new Error(j.error);
+      return j.data;
+    });
+}
+
 function showTab(name){
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
@@ -269,16 +276,13 @@ function showTab(name){
 
 /* ----- الأسماء ----- */
 function loadNames(){
-  google.script.run
-    .withSuccessHandler(list => { names = list; renderNameSelects(); })
-    .withFailureHandler(showErr)
-    .getNames();
+  api('names').then(list => renderNameSelects(list)).catch(showErr);
 }
 
-function renderNameSelects(){
-  const opts = names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  $('loanName').innerHTML = '<option value="" disabled selected>اختار الاسم</option>' + opts;
+function renderNameSelects(list){
+  const opts = list.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
   const current = $('detailName').value;
+  $('loanName').innerHTML = '<option value="" disabled selected>اختار الاسم</option>' + opts;
   $('detailName').innerHTML = '<option value="" disabled selected>اختار الاسم</option>' + opts;
   if (current) $('detailName').value = current;
 }
@@ -286,27 +290,24 @@ function renderNameSelects(){
 function submitName(){
   const v = $('newName').value.trim();
   if (!v) { toast('اكتب الاسم الأول', 'err'); return; }
-  google.script.run
-    .withSuccessHandler(list => {
-      names = list;
-      renderNameSelects();
+  api('addName', { name: v })
+    .then(list => {
+      renderNameSelects(list);
       $('newName').value = '';
       toast('اتضاف الاسم ✨', 'ok');
     })
-    .withFailureHandler(showErr)
-    .addName(v);
+    .catch(showErr);
 }
 
 /* ----- السلف الشهرية ----- */
 function loadMonth(){
-  google.script.run
-    .withSuccessHandler(data => {
+  api('month')
+    .then(data => {
       currentMonth = data.month;
       $('monthTitle').textContent = data.month;
       renderLoans(data.rows);
     })
-    .withFailureHandler(showErr)
-    .getCurrentMonthData();
+    .catch(showErr);
 }
 
 function renderLoans(rows){
@@ -339,29 +340,26 @@ function submitLoan(e){
   const btn = $('saveBtn');
   btn.disabled = true; btn.classList.add('loading');
 
-  google.script.run
-    .withSuccessHandler(() => {
-      btn.disabled = false; btn.classList.remove('loading');
+  api('add', { name, amount, notes })
+    .then(() => {
       $('loanAmount').value = '';
       $('loanNotes').value = '';
       toast('اتسجلت السلفة ✅', 'ok');
       loadMonth();
     })
-    .withFailureHandler(err => {
+    .catch(showErr)
+    .finally(() => {
       btn.disabled = false; btn.classList.remove('loading');
-      showErr(err);
-    })
-    .addLoan(name, amount, notes);
+    });
 }
 
 function removeLoan(row, btn){
   if (!confirm('متأكد إنك عايز تمسح السلفة دي؟')) return;
   const rowEl = btn.closest('.loan-row');
   rowEl.classList.add('removing');
-  google.script.run
-    .withSuccessHandler(() => { toast('اتمسحت 🗑️'); loadMonth(); })
-    .withFailureHandler(err => { rowEl.classList.remove('removing'); showErr(err); })
-    .deleteLoan(currentMonth, row);
+  api('delete', { month: currentMonth, row })
+    .then(() => { toast('اتمسحت 🗑️'); loadMonth(); })
+    .catch(err => { rowEl.classList.remove('removing'); showErr(err); });
 }
 
 /* ----- التفاصيل ----- */
@@ -372,10 +370,9 @@ function loadDetails(){
     return;
   }
   $('detailResult').innerHTML = '<div class="spinner"></div>';
-  google.script.run
-    .withSuccessHandler(renderDetails)
-    .withFailureHandler(showErr)
-    .getNameDetails(n);
+  api('details', { name: n })
+    .then(renderDetails)
+    .catch(showErr);
 }
 
 function renderDetails(d){
