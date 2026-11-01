@@ -152,6 +152,72 @@ select option{background:#0f172a}
   .addname input{width:120px}
   .big{font-size:32px}
 }
+
+/* إخفاء أسهم الأرقام */
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+/* ستايل الشيت */
+:root{
+  --bg1:#ffffff; --bg2:#ffffff;
+  --card:#ffffff; --line:#c8c8c8;
+  --text:#000000; --muted:#444444;
+  --acc:#4a86e8; --acc2:#4a86e8; --ok:#0b8043; --err:#d93025;
+}
+body{background:#f8f9fa!important;font-family:Arial,Tahoma,sans-serif;font-size:16px;font-weight:bold;animation:none}
+.topbar{background:#4a86e8;border-bottom:none;backdrop-filter:none}
+.brand{background:none;color:#fff;-webkit-text-fill-color:#fff;font-size:20px}
+.tabs{background:rgba(255,255,255,.2)}
+.tab{color:#fff}
+.tab.active{background:#fff;color:#4a86e8;box-shadow:none}
+.tab:not(.active):hover{color:#fff;background:rgba(255,255,255,.15)}
+input,select{background:#fff;color:#000;border:1px solid #c8c8c8;font-weight:normal}
+input:focus,select:focus{box-shadow:0 0 0 2px rgba(74,134,232,.3);transform:none}
+select option{background:#fff;color:#000}
+.primary{background:#4a86e8;color:#fff}
+.primary:hover{filter:brightness(1.05)}
+.small{background:#0b8043;color:#fff}
+.loading::after{border-color:#fff;border-top-color:transparent}
+.card{background:#fff;border:1px solid #c8c8c8;border-radius:0;box-shadow:none;backdrop-filter:none;padding:12px;margin-bottom:14px}
+.card:hover{transform:none;box-shadow:none}
+.clock #clockDay{color:#4a86e8}
+.clock #clockDate{color:#444}
+.big{color:#000}
+.card-head{border-bottom:none}
+.card-head b{color:#000;font-size:16px}
+
+/* الجدول */
+.loan-row{
+  background:#fff;border:1px solid #c8c8c8;border-radius:0;margin-bottom:-1px;
+  padding:8px 10px;font-size:16px;color:#000;
+}
+.loan-row:hover{background:#e8f0fe;border-color:#c8c8c8;transform:none}
+.loan-head{background:#4a86e8!important;color:#fff;border-color:#4a86e8;animation:none}
+.loan-head:hover{background:#4a86e8!important;transform:none}
+.lr-name,.lr-amt{color:#000}
+.lr-notes,.lr-time{color:#000;font-size:16px}
+.loan-head div{font-weight:bold;color:#fff}
+.trash{background:#fff;border:1px solid #c8c8c8;color:#d93025}
+.trash:hover{background:#fce8e6}
+.empty{color:#444}
+
+/* التفاصيل */
+.grand{background:#fff}
+.grand .big{color:#0b8043}
+.mh{color:#000;border-bottom:2px solid #4a86e8}
+.mh .mt{color:#4a86e8}
+.drow{border:1px solid #c8c8c8;border-top:none;border-radius:0;color:#000;font-size:16px;padding:8px 10px}
+.drow:hover{background:#e8f0fe}
+.drow .dn{color:#000}
+.drow-head{background:#4a86e8;color:#fff;border-color:#4a86e8;animation:none}
+.drow-head:hover{background:#4a86e8}
+.spinner{border-color:#ddd;border-top-color:#4a86e8}
+
+/* التوست */
+.toast{background:#fff;color:#000;border:1px solid #c8c8c8;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.ok{border-color:#0b8043}
+.toast.err{border-color:#d93025}
 </style>
 </head>
 <body>
@@ -185,7 +251,7 @@ select option{background:#0f172a}
       </div>
       <div>
         <label>رقم السلفة</label>
-        <input id="loanAmount" type="number" min="1" step="any" placeholder="مثال: 500">
+        <input id="loanAmount" type="number" min="1" step="any">
       </div>
       <div class="full">
         <label>الملاحظات</label>
@@ -316,10 +382,14 @@ function renderLoans(rows){
   countUp($('monthTotal'), total);
 
   if (!rows.length){
-    box.innerHTML = '<div class="empty">مفيش سلف في الشهر ده لسه 🌙</div>';
+    box.innerHTML = '<div class="empty">مفيش سلف في الشهر ده لسه</div>';
     return;
   }
-  box.innerHTML = rows.slice().reverse().map((r, i) => `
+  const head = `
+    <div class="loan-row loan-head">
+      <div>الاسم</div><div>المبلغ</div><div>الملاحظات</div><div>التاريخ والوقت</div><div></div>
+    </div>`;
+  const body = rows.slice().reverse().map((r, i) => `
     <div class="loan-row" style="animation-delay:${i*60}ms">
       <div class="lr-name">${esc(r.name)}</div>
       <div class="lr-amt">${fmt(r.amount)}</div>
@@ -327,6 +397,7 @@ function renderLoans(rows){
       <div class="lr-time">${esc(r.day)} ${esc(r.date)} · ${esc(r.time)}</div>
       <button class="trash" title="امسح" onclick="removeLoan(${r.row}, this)">🗑️</button>
     </div>`).join('');
+  box.innerHTML = head + body;
 }
 
 function submitLoan(e){
@@ -382,7 +453,7 @@ function renderDetails(d){
   }
   let html = `
     <div class="card grand">
-      <div style="color:var(--muted)">إجمالي سلف ${esc(d.name)}</div>
+      <div style="color:#444">إجمالي سلف ${esc(d.name)}</div>
       <div class="big" id="grandNum">0</div>
     </div>`;
 
@@ -390,11 +461,14 @@ function renderDetails(d){
     html += `
     <div class="card" style="animation-delay:${i*120}ms">
       <div class="mh"><span>${esc(m.month)}</span><span class="mt">${fmt(m.total)}</span></div>
+      <div class="drow drow-head">
+        <span>التاريخ</span><span>الوقت</span><span>المبلغ</span><span>الملاحظات</span>
+      </div>
       ${m.rows.map(r => `
         <div class="drow" style="animation-delay:${i*120 + 80}ms">
           <span>${esc(r.day)} ${esc(r.date)}</span>
           <span>${esc(r.time)}</span>
-          <span style="color:var(--ok);font-weight:bold">${fmt(r.amount)}</span>
+          <span>${fmt(r.amount)}</span>
           <span class="dn">${esc(r.notes) || '—'}</span>
         </div>`).join('')}
     </div>`;
