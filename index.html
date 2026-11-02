@@ -27,12 +27,14 @@ body{
 @keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.5)}70%{box-shadow:0 0 0 14px rgba(56,189,248,0)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
+@keyframes ddDrop{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes ddItemIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
 
 /* الهيدر */
 .topbar{
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
   padding:16px 24px; background:rgba(15,23,42,.6); backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10;
+  border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50;
   animation:fadeUp .5s ease both;
 }
 .brand{font-weight:bold; font-size:20px; background:linear-gradient(90deg,var(--acc),var(--acc2)); -webkit-background-clip:text; background-clip:text; color:transparent}
@@ -43,8 +45,6 @@ body{
 }
 .tab.active{background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#0f172a; font-weight:bold; box-shadow:0 4px 14px rgba(56,189,248,.35)}
 .tab:not(.active):hover{color:var(--text); background:rgba(255,255,255,.06)}
-.addname{display:flex; gap:6px}
-.addname input{width:150px}
 
 /* الصفحات */
 main{max-width:980px; margin:24px auto; padding:0 16px}
@@ -72,8 +72,7 @@ input,select{
   width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
   background:rgba(15,23,42,.6); color:var(--text); font-size:15px; outline:none; transition:all .25s; font-family:inherit;
 }
-input:focus,select:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); transform:translateY(-1px)}
-select option{background:#0f172a}
+input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); transform:translateY(-1px)}
 .primary{
   width:100%; padding:13px; border:0; border-radius:12px; cursor:pointer; font-size:16px; font-weight:bold; font-family:inherit;
   color:#0f172a; background:linear-gradient(90deg,var(--acc),var(--acc2)); transition:transform .15s, filter .3s;
@@ -82,7 +81,7 @@ select option{background:#0f172a}
 .primary:active{transform:scale(.97)}
 .primary:disabled{opacity:.6; cursor:wait}
 .small{
-  padding:11px 16px; border:0; border-radius:11px; cursor:pointer; font-weight:bold; white-space:nowrap; font-family:inherit;
+  padding:11px 18px; border:0; border-radius:11px; cursor:pointer; font-weight:bold; white-space:nowrap; font-family:inherit;
   color:#0f172a; background:linear-gradient(90deg,var(--ok),var(--acc)); transition:transform .15s;
 }
 .small:hover{transform:translateY(-2px)}
@@ -91,6 +90,46 @@ select option{background:#0f172a}
   content:""; display:inline-block; width:16px; height:16px; margin-right:8px; vertical-align:middle;
   border:2px solid #0f172a; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite;
 }
+
+/* الدروب داون المخصص */
+.dd{position:relative; z-index:5}
+.dd-btn{
+  width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
+  background:rgba(15,23,42,.6); color:var(--text); font-size:15px; font-family:inherit;
+  display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+  transition:border-color .25s, box-shadow .25s, background .25s;
+}
+.dd-btn:hover{border-color:rgba(56,189,248,.5)}
+.dd.open .dd-btn{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15)}
+.dd-val{font-weight:bold}
+.dd-val.ph{color:var(--muted); font-weight:normal}
+.dd-arrow{
+  width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+  background:linear-gradient(135deg,var(--acc),var(--acc2)); color:#0f172a; font-size:12px;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.dd.open .dd-arrow{transform:rotate(180deg)}
+.dd-menu{
+  position:absolute; top:calc(100% + 8px); right:0; left:0; z-index:60;
+  background:rgba(15,23,42,.96); backdrop-filter:blur(12px);
+  border:1px solid var(--line); border-radius:14px; padding:6px;
+  box-shadow:0 18px 40px rgba(0,0,0,.5);
+  max-height:0; overflow:hidden; opacity:0; transform:translateY(-8px) scale(.97); transform-origin:top;
+  pointer-events:none; transition:max-height .35s ease, opacity .25s ease, transform .3s ease;
+}
+.dd.open .dd-menu{
+  max-height:280px; overflow-y:auto; opacity:1; transform:none; pointer-events:auto;
+  animation:ddDrop .3s ease both;
+}
+.dd-item{
+  padding:10px 14px; border-radius:10px; cursor:pointer; color:var(--text); font-weight:bold;
+  transition:background .2s, color .2s, padding-right .2s; opacity:0;
+}
+.dd.open .dd-item{animation:ddItemIn .35s ease both; animation-delay:calc(var(--i) * 45ms)}
+.dd-item:hover{background:rgba(56,189,248,.14); padding-right:18px}
+.dd-item.sel{background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#0f172a}
+.dd-menu::-webkit-scrollbar{width:6px}
+.dd-menu::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2); border-radius:6px}
 
 /* الجدول */
 .card-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px}
@@ -118,7 +157,7 @@ select option{background:#0f172a}
 
 /* التفاصيل */
 .picker{display:flex; gap:12px; align-items:center; margin-bottom:18px; flex-wrap:wrap}
-.picker select{max-width:320px}
+.picker .dd{max-width:320px; width:100%}
 .grand{text-align:center; background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(167,139,250,.18))}
 .grand .big{color:var(--ok)}
 .mh{display:flex; justify-content:space-between; font-weight:bold; font-size:18px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line)}
@@ -129,10 +168,30 @@ select option{background:#0f172a}
 }
 .drow:hover{background:rgba(255,255,255,.05)}
 .drow .dn{color:var(--muted)}
+.loan-head,.drow-head{
+  background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
+  font-weight:bold; color:var(--acc); animation:none;
+}
+.loan-head:hover,.drow-head:hover{transform:none; background:rgba(56,189,248,.15)}
+.loan-head div,.drow-head span{color:var(--acc)}
 .spinner{
   width:42px; height:42px; margin:30px auto; border-radius:50%;
   border:4px solid rgba(255,255,255,.15); border-top-color:var(--acc); animation:spin .9s linear infinite;
 }
+
+/* صفحة الأسماء */
+.sec-title{margin:0 0 16px; font-size:19px}
+.add-row{display:flex; gap:10px; align-items:stretch}
+.add-row input{flex:1}
+.name-row{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:12px 14px; border-radius:12px; margin-bottom:8px;
+  background:rgba(255,255,255,.04); border:1px solid transparent;
+  animation:slideIn .4s ease both; transition:background .25s, border-color .25s, transform .25s;
+}
+.name-row:hover{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.25); transform:translateX(-3px)}
+.name-row.removing{animation:rowOut .35s ease forwards}
+.nr-name{font-weight:bold; font-size:16px}
 
 /* التوست */
 #toasts{position:fixed; top:90px; left:50%; transform:translateX(-50%); z-index:99; display:flex; flex-direction:column; gap:8px; align-items:center}
@@ -149,22 +208,14 @@ select option{background:#0f172a}
   .form{grid-template-columns:1fr}
   .loan-row{grid-template-columns:1fr 1fr}
   .drow{grid-template-columns:1fr 1fr}
-  .addname input{width:120px}
   .big{font-size:32px}
+  .topbar{padding:12px 16px}
 }
 
 /* إخفاء أسهم الأرقام */
 input[type=number]{-moz-appearance:textfield;appearance:textfield}
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-
-/* صف العناوين في الجدول والتفاصيل */
-.loan-head,.drow-head{
-  background:rgba(56,189,248,.15); border-color:rgba(56,189,248,.35);
-  font-weight:bold; color:var(--acc); animation:none;
-}
-.loan-head:hover,.drow-head:hover{transform:none; background:rgba(56,189,248,.15)}
-.loan-head div,.drow-head span{color:var(--acc)}
 </style>
 </head>
 <body>
@@ -174,16 +225,14 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
   <div class="tabs">
     <button class="tab active" data-tab="main" onclick="showTab('main')">تسجيل السلف</button>
     <button class="tab" data-tab="details" onclick="showTab('details')">التفاصيل</button>
-  </div>
-  <div class="addname">
-    <input id="newName" placeholder="اسم جديد" onkeydown="if(event.key==='Enter')submitName()">
-    <button class="small" onclick="submitName()">＋ إضافة</button>
+    <button class="tab" data-tab="names" onclick="showTab('names')">الأسماء</button>
   </div>
 </header>
 
 <div id="toasts"></div>
 
 <main>
+  <!-- تسجيل السلف -->
   <section class="page active" id="page-main">
     <div class="card clock">
       <div id="clockDay"></div>
@@ -194,7 +243,11 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     <form class="card form" onsubmit="submitLoan(event)">
       <div>
         <label>الاسم</label>
-        <select id="loanName" required></select>
+        <div class="dd" id="loanDD">
+          <button type="button" class="dd-btn"><span class="dd-val ph">اختار الاسم</span><span class="dd-arrow">▼</span></button>
+          <div class="dd-menu"></div>
+        </div>
+        <input type="hidden" id="loanName">
       </div>
       <div>
         <label>رقم السلفة</label>
@@ -202,7 +255,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
       </div>
       <div class="full">
         <label>الملاحظات</label>
-        <input id="loanNotes" placeholder="اختياري">
+        <input id="loanNotes" placeholder="اختياري" autocomplete="off">
       </div>
       <div class="full">
         <button id="saveBtn" class="primary" type="submit">سجّل السلفة</button>
@@ -218,12 +271,32 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     </div>
   </section>
 
+  <!-- التفاصيل -->
   <section class="page" id="page-details">
     <div class="card picker">
       <label style="color:var(--muted)">اختار الاسم:</label>
-      <select id="detailName" onchange="loadDetails()"></select>
+      <div class="dd" id="detailDD">
+        <button type="button" class="dd-btn"><span class="dd-val ph">اختار الاسم</span><span class="dd-arrow">▼</span></button>
+        <div class="dd-menu"></div>
+      </div>
+      <input type="hidden" id="detailName">
     </div>
     <div id="detailResult"></div>
+  </section>
+
+  <!-- الأسماء -->
+  <section class="page" id="page-names">
+    <div class="card">
+      <h3 class="sec-title">كل الأسماء</h3>
+      <div id="namesList"></div>
+    </div>
+    <div class="card">
+      <h3 class="sec-title">إضافة اسم جديد</h3>
+      <div class="add-row">
+        <input id="newName" placeholder="اكتب الاسم" autocomplete="off" onkeydown="if(event.key==='Enter')submitName()">
+        <button class="small" onclick="submitName()">＋ إضافة</button>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -232,6 +305,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 const API_URL = 'https://script.google.com/macros/s/AKfycbyVryYDMSeSo7vvJNOyamVjRut5-A84WMhYa8J5s-UpVrsOM-eh4WE9Vw95H1yJYdDWMQ/exec';
 
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+let names = [];
 let currentMonth = '';
 
 function $(id){ return document.getElementById(id); }
@@ -281,6 +355,58 @@ function api(action, params = {}){
     });
 }
 
+/* ----- الدروب داون المخصص ----- */
+function fillDropdown(dd, list){
+  const menu = dd.querySelector('.dd-menu');
+  const hidden = dd.hidden_;
+  const val = dd.querySelector('.dd-val');
+  menu.innerHTML = list.map((n, i) =>
+    `<div class="dd-item" style="--i:${i}" data-value="${esc(n)}">${esc(n)}</div>`
+  ).join('');
+
+  if (!list.includes(hidden.value)) {
+    hidden.value = '';
+    val.textContent = 'اختار الاسم';
+    val.classList.add('ph');
+  } else {
+    val.textContent = hidden.value;
+    val.classList.remove('ph');
+  }
+
+  menu.querySelectorAll('.dd-item').forEach(it => {
+    if (it.dataset.value === hidden.value) it.classList.add('sel');
+    it.onclick = e => {
+      e.stopPropagation();
+      hidden.value = it.dataset.value;
+      val.textContent = it.dataset.value;
+      val.classList.remove('ph');
+      menu.querySelectorAll('.dd-item').forEach(x => x.classList.remove('sel'));
+      it.classList.add('sel');
+      dd.classList.remove('open');
+      if (dd.onPick) dd.onPick(hidden.value);
+    };
+  });
+}
+
+function setupDropdown(id, hiddenId, onPick){
+  const dd = $(id);
+  dd.hidden_ = $(hiddenId);
+  dd.onPick = onPick;
+  dd.querySelector('.dd-btn').onclick = e => {
+    e.stopPropagation();
+    document.querySelectorAll('.dd.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+    dd.classList.toggle('open');
+  };
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
+});
+
+/* ----- الصفحات ----- */
 function showTab(name){
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
@@ -288,16 +414,31 @@ function showTab(name){
 }
 
 /* ----- الأسماء ----- */
-function loadNames(){
-  api('names').then(list => renderNameSelects(list)).catch(showErr);
+function setNames(list){
+  names = list;
+  fillDropdown($('loanDD'), names);
+  fillDropdown($('detailDD'), names);
+  renderNamesList();
 }
 
-function renderNameSelects(list){
-  const opts = list.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  const current = $('detailName').value;
-  $('loanName').innerHTML = '<option value="" disabled selected>اختار الاسم</option>' + opts;
-  $('detailName').innerHTML = '<option value="" disabled selected>اختار الاسم</option>' + opts;
-  if (current) $('detailName').value = current;
+function loadNames(){
+  api('names').then(setNames).catch(showErr);
+}
+
+function renderNamesList(){
+  const box = $('namesList');
+  if (!names.length){
+    box.innerHTML = '<div class="empty">مفيش أسماء لسه</div>';
+    return;
+  }
+  box.innerHTML = names.map((n, i) => `
+    <div class="name-row" style="animation-delay:${i*50}ms">
+      <span class="nr-name">${esc(n)}</span>
+      <button class="trash" data-name="${esc(n)}" title="امسح">🗑️</button>
+    </div>`).join('');
+  box.querySelectorAll('.trash').forEach(b => {
+    b.onclick = () => removeName(b.dataset.name, b.closest('.name-row'));
+  });
 }
 
 function submitName(){
@@ -305,11 +446,27 @@ function submitName(){
   if (!v) { toast('اكتب الاسم الأول', 'err'); return; }
   api('addName', { name: v })
     .then(list => {
-      renderNameSelects(list);
+      setNames(list);
       $('newName').value = '';
       toast('اتضاف الاسم ✨', 'ok');
     })
     .catch(showErr);
+}
+
+function removeName(name, rowEl){
+  if (!confirm('متأكد إنك عايز تمسح "' + name + '" من الأسماء؟')) return;
+  rowEl.classList.add('removing');
+  api('deleteName', { name })
+    .then(list => {
+      setTimeout(() => {
+        setNames(list);
+        toast('اتمسح الاسم 🗑️');
+      }, 300);
+    })
+    .catch(err => {
+      rowEl.classList.remove('removing');
+      showErr(err);
+    });
 }
 
 /* ----- السلف الشهرية ----- */
@@ -426,6 +583,8 @@ function renderDetails(d){
 }
 
 /* ----- تشغيل ----- */
+setupDropdown('loanDD', 'loanName', null);
+setupDropdown('detailDD', 'detailName', () => loadDetails());
 tick();
 setInterval(tick, 1000);
 loadNames();
