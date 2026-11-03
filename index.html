@@ -57,6 +57,13 @@ body{
 }
 .logout:hover{background:rgba(248,113,113,.25)}
 .logout:active{transform:scale(.95)}
+.refresh{
+  border:1px solid var(--line); background:rgba(56,189,248,.12); color:var(--acc); width:38px; height:38px;
+  border-radius:10px; cursor:pointer; font-size:17px; transition:transform .2s, background .2s;
+}
+.refresh:hover{background:rgba(56,189,248,.25)}
+.refresh:active{transform:scale(.9)}
+.refresh.busy{animation:spin .7s linear infinite}
 
 /* شاشة الدخول */
 #authScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px}
@@ -85,6 +92,7 @@ main{max-width:980px; margin:24px auto; padding:0 16px}
   transition:transform .3s, box-shadow .3s;
 }
 .card:hover{transform:translateY(-2px); box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.card:has(.dd.open){position:relative; z-index:500}
 .sec-title{margin:0 0 16px; font-size:19px}
 .muted{color:var(--muted)}
 
@@ -125,6 +133,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 
 /* الدروب داون */
 .dd{position:relative; z-index:5}
+.dd.open{z-index:1000}
 .dd-btn{
   width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
   background:rgba(15,23,42,.6); color:var(--text); font-size:15px; font-family:inherit;
@@ -142,10 +151,9 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 }
 .dd.open .dd-arrow{transform:rotate(180deg)}
 .dd-menu{
-  position:absolute; top:calc(100% + 8px); right:0; left:0; z-index:60;
-  background:rgba(15,23,42,.96); backdrop-filter:blur(12px);
-  border:1px solid var(--line); border-radius:14px; padding:6px;
-  box-shadow:0 18px 40px rgba(0,0,0,.5);
+  position:absolute; top:calc(100% + 8px); right:0; left:0; z-index:1001;
+  background:#0f172a; border:1px solid var(--line); border-radius:14px; padding:6px;
+  box-shadow:0 18px 40px rgba(0,0,0,.6);
   max-height:0; overflow:hidden; opacity:0; transform:translateY(-8px) scale(.97); transform-origin:top;
   pointer-events:none; transition:max-height .35s ease, opacity .25s ease, transform .3s ease;
 }
@@ -180,15 +188,17 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
   box-shadow:0 0 18px rgba(250,204,21,.18); animation:slideIn .4s ease both, glow 2.4s ease-in-out infinite;
 }
 .ln.done{background:rgba(52,211,153,.16); border-color:rgba(52,211,153,.75)}
+.ln.rej{background:rgba(248,113,113,.16); border-color:rgba(248,113,113,.75)}
 .ln.removing{animation:rowOut .35s ease forwards}
 .ln-main{font-size:15px}
 .ln-amt{font-variant-numeric:tabular-nums; color:var(--text)}
 .ln-notes{color:var(--muted); font-size:14px}
-.ln-actions{display:flex; align-items:center; gap:8px; justify-content:flex-end}
+.ln-actions{display:flex; align-items:center; gap:8px; justify-content:flex-end; flex-wrap:wrap}
 .ln-meta{grid-column:1/-1; color:var(--muted); font-size:13px}
 .badge{font-size:12px; padding:3px 10px; border-radius:20px; font-weight:bold; animation:pop .4s ease both}
 .badge.pend{background:var(--yel); color:#422006}
 .badge.done{background:var(--ok); color:#052e16}
+.badge.rej{background:var(--err); color:#450a0a}
 
 .trash{
   border:0; background:rgba(248,113,113,.12); color:var(--err); width:38px; height:38px;
@@ -197,15 +207,33 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 .trash:hover{background:rgba(248,113,113,.28); animation:shake .5s ease}
 .trash:active{transform:scale(.9)}
 
-.done-btn{
+.done-btn, .rej-btn{
   border:0; padding:8px 14px; border-radius:10px; cursor:pointer; font-family:inherit; font-weight:bold;
-  color:#052e16; background:linear-gradient(90deg,var(--ok),var(--acc)); transition:transform .15s, filter .2s;
+  transition:transform .15s, filter .2s;
 }
-.done-btn:hover{transform:translateY(-2px); filter:brightness(1.08)}
-.done-btn:active{transform:scale(.95)}
-.done-btn:disabled{opacity:.5; cursor:wait}
+.done-btn{color:#052e16; background:linear-gradient(90deg,var(--ok),var(--acc))}
+.rej-btn{color:#450a0a; background:linear-gradient(90deg,var(--err),#fb923c)}
+.done-btn:hover, .rej-btn:hover{transform:translateY(-2px); filter:brightness(1.08)}
+.done-btn:active, .rej-btn:active{transform:scale(.95)}
+.done-btn:disabled, .rej-btn:disabled{opacity:.5; cursor:wait}
 
 .empty{text-align:center; color:var(--muted); padding:30px 10px; animation:pop .5s ease both}
+
+/* جدول اليوزرات (نفس شكل جدول الشهر) */
+.utable{display:flex; flex-direction:column}
+.urow{
+  display:grid; grid-template-columns:1.2fr 1.2fr 1fr .8fr; gap:10px; align-items:center;
+  padding:12px 14px; border-radius:12px; margin-bottom:8px;
+  background:rgba(255,255,255,.04); border:1px solid var(--line);
+  animation:slideIn .4s ease both; transition:background .25s, border-color .25s, transform .25s;
+}
+.urow:hover{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.25); transform:translateX(-3px)}
+.urow.uhead, .loan-head{
+  background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
+  font-weight:bold; color:var(--acc); animation:none;
+}
+.urow.uhead:hover{transform:none; background:rgba(56,189,248,.15)}
+.urow .pw{font-variant-numeric:tabular-nums; color:var(--muted)}
 
 /* التفاصيل */
 .picker{display:flex; gap:12px; align-items:center; margin-bottom:18px; flex-wrap:wrap}
@@ -220,12 +248,9 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
   border:4px solid rgba(255,255,255,.15); border-top-color:var(--acc); animation:spin .9s linear infinite;
 }
 
-/* إضافة سلفة للموظف */
 .toggle-form{width:100%; margin-bottom:14px}
 
 /* صفحة الأسماء */
-.add-row{display:flex; gap:10px; align-items:stretch}
-.add-row input{flex:1}
 .name-row{
   display:flex; justify-content:space-between; align-items:center; gap:10px;
   padding:12px 14px; border-radius:12px; margin-bottom:8px;
@@ -249,6 +274,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 /* موبايل */
 @media (max-width:700px){
   .form, .row2{grid-template-columns:1fr}
+  .urow{grid-template-columns:1fr 1fr}
   .big{font-size:32px}
   .topbar{padding:12px 16px}
 }
@@ -266,7 +292,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
     <form id="loginForm" class="stack form-slide" onsubmit="doLogin(event)">
       <div>
         <label>رقم الموبايل (اليوزر)</label>
-        <input id="lgPhone" type="tel" inputmode="numeric" autocomplete="username" required>
+        <input id="lgPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="username" required>
       </div>
       <div>
         <label>الباسورد</label>
@@ -283,7 +309,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
       </div>
       <div>
         <label>رقم الموبايل (اليوزر)</label>
-        <input id="rgPhone" type="tel" inputmode="numeric" required>
+        <input id="rgPhone" type="tel" inputmode="numeric" maxlength="11" required>
       </div>
       <div>
         <label>الباسورد</label>
@@ -303,10 +329,12 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
       <button class="tab admin-only active" data-tab="main" onclick="showTab('main')">تسجيل السلف</button>
       <button class="tab admin-only" data-tab="details" onclick="showTab('details')">التفاصيل</button>
       <button class="tab admin-only" data-tab="requests" onclick="showTab('requests')">الطلبات</button>
+      <button class="tab admin-only" data-tab="users" onclick="showTab('users')">اليوزرات</button>
       <button class="tab admin-only" data-tab="names" onclick="showTab('names')">الأسماء</button>
       <button class="tab emp-only" data-tab="me" onclick="showTab('me')">سلفي</button>
     </div>
     <div class="user-chip">
+      <button class="refresh" id="refreshBtn" title="تحديث" onclick="refreshNow()">🔄</button>
       <div>
         <div class="user-name" id="userName"></div>
         <span class="role-tag" id="userRole"></span>
@@ -370,18 +398,19 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
       </div>
     </section>
 
+    <!-- الأدمن: اليوزرات -->
+    <section class="page admin-only" id="page-users">
+      <div class="card">
+        <h3 class="sec-title">كل اليوزرات</h3>
+        <div class="utable" id="usersList"></div>
+      </div>
+    </section>
+
     <!-- الأدمن: الأسماء -->
     <section class="page admin-only" id="page-names">
       <div class="card">
         <h3 class="sec-title">كل الأسماء</h3>
         <div id="namesList"></div>
-      </div>
-      <div class="card">
-        <h3 class="sec-title">إضافة اسم جديد</h3>
-        <div class="add-row">
-          <input id="newName" placeholder="اكتب الاسم" autocomplete="off" onkeydown="if(event.key==='Enter')submitName()">
-          <button class="small" onclick="submitName()">＋ إضافة</button>
-        </div>
       </div>
     </section>
 
@@ -424,8 +453,12 @@ const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء
 const PAY_METHODS = ['نقدي','انستا باي','فودافون كاش'];
 const ST_PEND = 'معلقة';
 const ST_DONE = 'تم';
+const ST_REJ = 'مرفوض';
+
 let names = [];
 let currentMonth = '';
+let curTab = 'main';
+const cache = {};
 
 /* ----- أدوات ----- */
 function $(id){ return document.getElementById(id); }
@@ -489,6 +522,16 @@ function api(action, params = {}, creds = null){
     });
 }
 
+/* تحميل صفحة مع مقارنة: بيرسم بس لو البيانات اتغيرت (إلا لو force) */
+function fetchView(key, action, params, render, force){
+  return api(action, params).then(data => {
+    const s = JSON.stringify(data);
+    if (!force && cache[key] === s) return;
+    cache[key] = s;
+    render(data);
+  });
+}
+
 /* ----- الدروب داون ----- */
 const dds = {};
 function initDD(id, placeholder, onPick){
@@ -547,6 +590,7 @@ function showAuth(mode){
 function doLogin(e){
   e.preventDefault();
   const u = $('lgPhone').value.trim(), p = $('lgPass').value;
+  if (!/^\d{11}$/.test(u)) return toast('لازم رقم الموبايل يكون 11 رقم بس', 'err');
   const btn = $('lgBtn');
   setBusy(btn, true);
   api('login', {}, { u, p })
@@ -563,6 +607,7 @@ function doRegister(e){
   const name = $('rgName').value.trim();
   const phone = $('rgPhone').value.trim();
   const pass = $('rgPass').value;
+  if (!/^\d{11}$/.test(phone)) return toast('لازم رقم الموبايل يكون 11 رقم بس', 'err');
   const btn = $('rgBtn');
   setBusy(btn, true);
   api('register', { name, phone, pass })
@@ -587,7 +632,7 @@ function enterApp(){
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
   document.querySelectorAll('.emp-only').forEach(el => el.classList.toggle('hidden', isAdmin));
   if (isAdmin){
-    loadNames();
+    loadNames(true);
     showTab('main');
   } else {
     ddSetItems('myMethodDD', PAY_METHODS);
@@ -595,23 +640,58 @@ function enterApp(){
   }
 }
 
-/* ----- الصفحات ----- */
+/* ----- الصفحات والتحديث ----- */
 function showTab(name){
+  curTab = name;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
-  if (name === 'main') loadMonth();
-  if (name === 'details') loadDetails();
-  if (name === 'requests') loadRequests();
-  if (name === 'names') renderNamesList();
-  if (name === 'me') loadMyDetails();
+  loadCurrent(false);
 }
+
+function loadCurrent(force){
+  const s = getSession();
+  if (!s) return Promise.resolve();
+  switch (curTab){
+    case 'main':     return fetchView('month', 'month', {}, renderMonth, force);
+    case 'details': {
+      const n = ddGet('detailDD');
+      if (!n){ $('detailResult').innerHTML = '<div class="empty">اختار اسم عشان تشوف التفاصيل</div>'; return Promise.resolve(); }
+      return fetchView('d:' + n, 'details', { name: n },
+        d => renderBlock($('detailResult'), d, `مفيش سلف مسجلة لـ ${esc(d.name)}`), force);
+    }
+    case 'requests': return fetchView('requests', 'requests', {}, renderRequests, force);
+    case 'users':    return fetchView('users', 'users', {}, renderUsers, force);
+    case 'names':    return loadNames(force);
+    case 'me':       return fetchView('me', 'myDetails', {},
+                       d => renderBlock($('myResult'), d, 'مفيش سلف مسجلة ليك لسه 🌙'), force);
+  }
+  return Promise.resolve();
+}
+
+function refreshNow(){
+  const b = $('refreshBtn');
+  b.classList.add('busy');
+  Promise.resolve()
+    .then(() => loadCurrent(true))
+    .catch(showErr)
+    .finally(() => b.classList.remove('busy'));
+}
+
+/* تحديث تلقائي كل 8 ثواني لكل المستخدمين */
+setInterval(() => {
+  const s = getSession();
+  if (!s || document.hidden || $('appScreen').classList.contains('hidden')) return;
+  loadCurrent(false).catch(() => {});
+  if (s.role === 'admin' && curTab !== 'names') loadNames(false).catch(() => {});
+}, 8000);
 
 /* ----- بلوكات السلف (مشتركة) ----- */
 function loanRowHTML(r, i, opts = {}){
   const st = r.status || '';
-  const cls = st === ST_PEND ? 'pend' : st === ST_DONE ? 'done' : '';
+  const cls = st === ST_PEND ? 'pend' : st === ST_DONE ? 'done' : st === ST_REJ ? 'rej' : '';
   const badge = st === ST_PEND ? '<span class="badge pend">معلقة</span>'
-              : st === ST_DONE ? '<span class="badge done">تم ✅</span>' : '';
+              : st === ST_DONE ? '<span class="badge done">تم ✅</span>'
+              : st === ST_REJ ? '<span class="badge rej">مرفوض ✖</span>' : '';
   const name = opts.showName ? `<b>${esc(r.name)}</b> · ` : '';
   const notes = r.notes ? ` <span class="ln-notes">· ${esc(r.notes)}</span>` : '';
   const meta = [`${esc(r.day)} ${esc(r.date)} · ${esc(r.time)}`];
@@ -661,14 +741,6 @@ function toggleMyForm(){
   if (willShow){ f.classList.remove('form-slide'); void f.offsetWidth; f.classList.add('form-slide'); }
 }
 
-function loadMyDetails(){
-  const box = $('myResult');
-  box.innerHTML = '<div class="spinner"></div>';
-  api('myDetails')
-    .then(d => renderBlock(box, d, 'مفيش سلف مسجلة ليك لسه 🌙'))
-    .catch(showErr);
-}
-
 function submitMyLoan(e){
   e.preventDefault();
   const amount = $('myAmount').value;
@@ -688,15 +760,15 @@ function submitMyLoan(e){
       ddSetItems('myMethodDD', PAY_METHODS);
       toast('اتبعتت السلفة ✅ مستنية الأدمن', 'ok');
       $('myForm').classList.add('hidden');
-      loadMyDetails();
+      loadCurrent(true);
     })
     .catch(showErr)
     .finally(() => setBusy(btn, false));
 }
 
 /* ----- الأدمن: الأسماء ----- */
-function loadNames(){
-  api('names').then(setNames).catch(showErr);
+function loadNames(force){
+  return fetchView('names', 'names', {}, setNames, force);
 }
 
 function setNames(list){
@@ -722,24 +794,13 @@ function renderNamesList(){
   });
 }
 
-function submitName(){
-  const v = $('newName').value.trim();
-  if (!v) { toast('اكتب الاسم الأول', 'err'); return; }
-  api('addName', { name: v })
-    .then(list => {
-      setNames(list);
-      $('newName').value = '';
-      toast('اتضاف الاسم ✨', 'ok');
-    })
-    .catch(showErr);
-}
-
 function removeName(name, rowEl){
   if (!confirm('متأكد إنك عايز تمسح "' + name + '" من الأسماء؟')) return;
   rowEl.classList.add('removing');
   api('deleteName', { name })
     .then(list => {
       setTimeout(() => {
+        cache['names'] = JSON.stringify(list);
         setNames(list);
         toast('اتمسح الاسم 🗑️');
       }, 300);
@@ -751,18 +812,11 @@ function removeName(name, rowEl){
 }
 
 /* ----- الأدمن: تسجيل السلف ----- */
-function loadMonth(){
-  api('month')
-    .then(data => {
-      currentMonth = data.month;
-      $('monthTitle').textContent = data.month;
-      renderMonth(data.rows);
-    })
-    .catch(showErr);
-}
-
-function renderMonth(rows){
-  countUp($('monthTotal'), rows.reduce((s, r) => s + r.amount, 0));
+function renderMonth(data){
+  currentMonth = data.month;
+  $('monthTitle').textContent = data.month;
+  const rows = data.rows;
+  countUp($('monthTotal'), rows.filter(r => r.status !== ST_REJ).reduce((s, r) => s + r.amount, 0));
   const box = $('loanList');
   if (!rows.length){
     box.innerHTML = '<div class="empty">مفيش سلف في الشهر ده لسه 🌙</div>';
@@ -789,7 +843,7 @@ function submitLoan(e){
       $('loanAmount').value = '';
       $('loanNotes').value = '';
       toast('اتسجلت السلفة ✅', 'ok');
-      loadMonth();
+      loadCurrent(true);
     })
     .catch(showErr)
     .finally(() => setBusy(btn, false));
@@ -800,41 +854,60 @@ function removeLoan(row, btn){
   const rowEl = btn.closest('.ln');
   rowEl.classList.add('removing');
   api('delete', { month: currentMonth, row })
-    .then(() => { toast('اتمسحت 🗑️'); loadMonth(); })
+    .then(() => { toast('اتمسحت 🗑️'); loadCurrent(true); })
     .catch(err => { rowEl.classList.remove('removing'); showErr(err); });
 }
 
-/* ----- الأدمن: الطلبات ----- */
-function loadRequests(){
+/* ----- الأدمن: الطلبات (موافقة / رفض) ----- */
+function renderRequests(rows){
   const box = $('requestsList');
-  box.innerHTML = '<div class="spinner"></div>';
-  api('requests')
-    .then(rows => {
-      if (!rows.length){
-        box.innerHTML = '<div class="empty">مفيش طلبات لسه</div>';
-        return;
-      }
-      box.innerHTML = rows.map((r, i) => {
-        const btn = r.status === ST_PEND
-          ? `<button class="done-btn" onclick="markDone('${esc(r.month)}', ${r.row}, this)">تم ✓</button>`
-          : '';
-        return loanRowHTML(r, i, { showName: true, actions: btn });
-      }).join('');
-    })
-    .catch(showErr);
+  if (!rows.length){
+    box.innerHTML = '<div class="empty">مفيش طلبات لسه</div>';
+    return;
+  }
+  box.innerHTML = rows.map((r, i) => {
+    const acts = r.status === ST_PEND
+      ? `<button class="done-btn" data-act="done" data-m="${esc(r.month)}" data-r="${r.row}">موافقة ✓</button>` +
+        `<button class="rej-btn" data-act="reject" data-m="${esc(r.month)}" data-r="${r.row}">رفض ✖</button>`
+      : '';
+    return loanRowHTML(r, i, { showName: true, actions: acts });
+  }).join('');
+  box.querySelectorAll('[data-act]').forEach(b => {
+    b.onclick = () => setStatus(b.dataset.m, Number(b.dataset.r), b.dataset.act, b);
+  });
 }
 
-function markDone(month, row, btn){
-  btn.disabled = true;
-  api('done', { month, row })
+function setStatus(month, row, act, btn){
+  btn.closest('.ln-actions').querySelectorAll('button').forEach(x => x.disabled = true);
+  api('setStatus', { month, row, s: act })
     .then(() => {
-      toast('اتعلّمت تم ✅', 'ok');
-      loadRequests();
+      toast(act === 'done' ? 'اتوافق على السلفة ✅' : 'اترفضت السلفة ✖', act === 'done' ? 'ok' : 'err');
+      loadCurrent(true);
     })
     .catch(err => {
-      btn.disabled = false;
+      btn.closest('.ln-actions').querySelectorAll('button').forEach(x => x.disabled = false);
       showErr(err);
     });
+}
+
+/* ----- الأدمن: اليوزرات ----- */
+function renderUsers(list){
+  const box = $('usersList');
+  if (!list.length){
+    box.innerHTML = '<div class="empty">مفيش يوزرات لسه</div>';
+    return;
+  }
+  box.innerHTML = `
+    <div class="urow uhead">
+      <div>الاسم</div><div>اليوزر (الموبايل)</div><div>الباسورد</div><div>الدور</div>
+    </div>` +
+    list.map((u, i) => `
+      <div class="urow" style="animation-delay:${i * 50}ms">
+        <div><b>${esc(u.name)}</b></div>
+        <div>${esc(u.username)}</div>
+        <div class="pw">${esc(u.password)}</div>
+        <div><span class="role-tag">${u.role === 'admin' ? 'أدمن' : 'موظف'}</span></div>
+      </div>`).join('');
 }
 
 /* ----- الأدمن: التفاصيل ----- */
@@ -846,8 +919,8 @@ function loadDetails(){
     return;
   }
   box.innerHTML = '<div class="spinner"></div>';
-  api('details', { name: n })
-    .then(d => renderBlock(box, d, `مفيش سلف مسجلة لـ ${esc(d.name)}`))
+  fetchView('d:' + n, 'details', { name: n },
+    d => renderBlock(box, d, `مفيش سلف مسجلة لـ ${esc(d.name)}`), true)
     .catch(showErr);
 }
 
