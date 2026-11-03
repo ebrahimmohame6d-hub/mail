@@ -10,6 +10,7 @@
   --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.12);
   --text:#f1f5f9; --muted:#94a3b8;
   --acc:#38bdf8; --acc2:#a78bfa; --ok:#34d399; --err:#f87171;
+  --yel:#facc15;
 }
 *{box-sizing:border-box}
 body{
@@ -17,6 +18,7 @@ body{
   background:linear-gradient(-45deg,var(--bg1),var(--bg2),#0c4a6e,#312e81);
   background-size:400% 400%; animation:bgMove 18s ease infinite;
 }
+.hidden{display:none !important}
 @keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes pop{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
@@ -29,6 +31,7 @@ body{
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.5)}70%{box-shadow:0 0 0 14px rgba(56,189,248,0)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
 @keyframes ddDrop{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes ddItemIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(250,204,21,.35)}50%{box-shadow:0 0 0 6px rgba(250,204,21,0)}}
 
 /* الهيدر */
 .topbar{
@@ -38,13 +41,37 @@ body{
   animation:fadeUp .5s ease both;
 }
 .brand{font-weight:bold; font-size:20px; background:linear-gradient(90deg,var(--acc),var(--acc2)); -webkit-background-clip:text; background-clip:text; color:transparent}
-.tabs{display:flex; gap:6px; background:rgba(255,255,255,.05); padding:4px; border-radius:12px}
+.tabs{display:flex; gap:6px; background:rgba(255,255,255,.05); padding:4px; border-radius:12px; flex-wrap:wrap}
 .tab{
   border:0; background:transparent; color:var(--muted); padding:8px 16px; border-radius:9px;
   cursor:pointer; font-size:15px; transition:all .3s; font-family:inherit;
 }
 .tab.active{background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#0f172a; font-weight:bold; box-shadow:0 4px 14px rgba(56,189,248,.35)}
 .tab:not(.active):hover{color:var(--text); background:rgba(255,255,255,.06)}
+.user-chip{display:flex; align-items:center; gap:12px}
+.user-name{font-weight:bold; font-size:15px}
+.role-tag{display:inline-block; margin-top:3px; font-size:12px; padding:2px 10px; border-radius:20px; background:rgba(56,189,248,.15); color:var(--acc)}
+.logout{
+  border:1px solid var(--line); background:rgba(248,113,113,.12); color:var(--err); padding:8px 14px;
+  border-radius:10px; cursor:pointer; font-family:inherit; font-weight:bold; transition:transform .15s, background .2s;
+}
+.logout:hover{background:rgba(248,113,113,.25)}
+.logout:active{transform:scale(.95)}
+
+/* شاشة الدخول */
+#authScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px}
+.auth-card{width:100%; max-width:380px; padding:28px 24px; animation:fadeUp .5s ease both}
+.auth-brand{text-align:center; font-size:24px; margin-bottom:6px}
+.auth-title{margin:0 0 6px; text-align:center; font-size:20px}
+.auth-sub{text-align:center; color:var(--muted); margin:0 0 20px; font-size:14px}
+.stack{display:flex; flex-direction:column; gap:14px}
+.stack label, .form label{font-size:14px; color:var(--muted); display:block; margin-bottom:6px}
+.link-btn{
+  background:none; border:0; color:var(--acc); cursor:pointer; font-family:inherit; font-size:14px;
+  text-decoration:underline; width:100%; padding:6px; transition:transform .2s;
+}
+.link-btn:hover{transform:translateY(-1px)}
+.form-slide{animation:fadeUp .4s ease both}
 
 /* الصفحات */
 main{max-width:980px; margin:24px auto; padding:0 16px}
@@ -58,6 +85,8 @@ main{max-width:980px; margin:24px auto; padding:0 16px}
   transition:transform .3s, box-shadow .3s;
 }
 .card:hover{transform:translateY(-2px); box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.sec-title{margin:0 0 16px; font-size:19px}
+.muted{color:var(--muted)}
 
 .clock{text-align:center}
 .clock #clockDay{font-size:18px; color:var(--acc)}
@@ -66,13 +95,16 @@ main{max-width:980px; margin:24px auto; padding:0 16px}
 
 /* الفورم */
 .form{display:grid; grid-template-columns:1fr 1fr; gap:14px 16px}
-.form label{font-size:14px; color:var(--muted); display:block; margin-bottom:6px}
 .form .full{grid-column:1/-1}
-input,select{
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:14px 16px}
+input{
   width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
   background:rgba(15,23,42,.6); color:var(--text); font-size:15px; outline:none; transition:all .25s; font-family:inherit;
 }
 input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); transform:translateY(-1px)}
+input[type=number]{-moz-appearance:textfield; appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 .primary{
   width:100%; padding:13px; border:0; border-radius:12px; cursor:pointer; font-size:16px; font-weight:bold; font-family:inherit;
   color:#0f172a; background:linear-gradient(90deg,var(--acc),var(--acc2)); transition:transform .15s, filter .3s;
@@ -91,7 +123,7 @@ input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); 
   border:2px solid #0f172a; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite;
 }
 
-/* الدروب داون المخصص */
+/* الدروب داون */
 .dd{position:relative; z-index:5}
 .dd-btn{
   width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--line);
@@ -131,28 +163,48 @@ input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); 
 .dd-menu::-webkit-scrollbar{width:6px}
 .dd-menu::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2); border-radius:6px}
 
-/* الجدول */
+/* الصفوف */
 .card-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px}
 .card-head h3{margin:0; font-size:19px}
 .card-head b{color:var(--ok); font-size:18px}
-.loan-row{
-  display:grid; grid-template-columns:1.1fr 1fr 1.6fr 1.5fr auto; gap:10px; align-items:center;
-  padding:12px 14px; border-radius:12px; margin-bottom:8px;
-  background:rgba(255,255,255,.04); border:1px solid transparent;
-  animation:slideIn .4s ease both; transition:background .25s, border-color .25s, transform .25s;
+
+.ln{
+  display:grid; grid-template-columns:1fr auto; gap:6px 12px; align-items:center;
+  padding:12px 14px; border-radius:12px; margin-bottom:10px;
+  background:rgba(255,255,255,.04); border:1px solid var(--line);
+  animation:slideIn .4s ease both; transition:transform .25s, box-shadow .25s, background .25s;
 }
-.loan-row:hover{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.25); transform:translateX(-3px)}
-.loan-row.removing{animation:rowOut .35s ease forwards}
-.lr-name{font-weight:bold}
-.lr-amt{color:var(--ok); font-weight:bold; font-variant-numeric:tabular-nums}
-.lr-notes{color:var(--muted); font-size:14px}
-.lr-time{color:var(--muted); font-size:13px}
+.ln:hover{transform:translateX(-3px)}
+.ln.pend{
+  background:rgba(250,204,21,.16); border-color:rgba(250,204,21,.75);
+  box-shadow:0 0 18px rgba(250,204,21,.18); animation:slideIn .4s ease both, glow 2.4s ease-in-out infinite;
+}
+.ln.done{background:rgba(52,211,153,.16); border-color:rgba(52,211,153,.75)}
+.ln.removing{animation:rowOut .35s ease forwards}
+.ln-main{font-size:15px}
+.ln-amt{font-variant-numeric:tabular-nums; color:var(--text)}
+.ln-notes{color:var(--muted); font-size:14px}
+.ln-actions{display:flex; align-items:center; gap:8px; justify-content:flex-end}
+.ln-meta{grid-column:1/-1; color:var(--muted); font-size:13px}
+.badge{font-size:12px; padding:3px 10px; border-radius:20px; font-weight:bold; animation:pop .4s ease both}
+.badge.pend{background:var(--yel); color:#422006}
+.badge.done{background:var(--ok); color:#052e16}
+
 .trash{
   border:0; background:rgba(248,113,113,.12); color:var(--err); width:38px; height:38px;
   border-radius:10px; cursor:pointer; font-size:17px; transition:background .2s, transform .2s;
 }
 .trash:hover{background:rgba(248,113,113,.28); animation:shake .5s ease}
 .trash:active{transform:scale(.9)}
+
+.done-btn{
+  border:0; padding:8px 14px; border-radius:10px; cursor:pointer; font-family:inherit; font-weight:bold;
+  color:#052e16; background:linear-gradient(90deg,var(--ok),var(--acc)); transition:transform .15s, filter .2s;
+}
+.done-btn:hover{transform:translateY(-2px); filter:brightness(1.08)}
+.done-btn:active{transform:scale(.95)}
+.done-btn:disabled{opacity:.5; cursor:wait}
+
 .empty{text-align:center; color:var(--muted); padding:30px 10px; animation:pop .5s ease both}
 
 /* التفاصيل */
@@ -160,27 +212,18 @@ input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); 
 .picker .dd{max-width:320px; width:100%}
 .grand{text-align:center; background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(167,139,250,.18))}
 .grand .big{color:var(--ok)}
+.pend-sum{color:var(--yel); font-weight:bold; margin-top:6px}
 .mh{display:flex; justify-content:space-between; font-weight:bold; font-size:18px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line)}
 .mh .mt{color:var(--acc)}
-.drow{
-  display:grid; grid-template-columns:1fr 1fr 1fr 1.6fr; gap:10px; padding:9px 12px; border-radius:10px;
-  font-size:14px; animation:slideIn .35s ease both; transition:background .2s;
-}
-.drow:hover{background:rgba(255,255,255,.05)}
-.drow .dn{color:var(--muted)}
-.loan-head,.drow-head{
-  background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
-  font-weight:bold; color:var(--acc); animation:none;
-}
-.loan-head:hover,.drow-head:hover{transform:none; background:rgba(56,189,248,.15)}
-.loan-head div,.drow-head span{color:var(--acc)}
 .spinner{
   width:42px; height:42px; margin:30px auto; border-radius:50%;
   border:4px solid rgba(255,255,255,.15); border-top-color:var(--acc); animation:spin .9s linear infinite;
 }
 
+/* إضافة سلفة للموظف */
+.toggle-form{width:100%; margin-bottom:14px}
+
 /* صفحة الأسماء */
-.sec-title{margin:0 0 16px; font-size:19px}
 .add-row{display:flex; gap:10px; align-items:stretch}
 .add-row input{flex:1}
 .name-row{
@@ -205,115 +248,193 @@ input:focus{border-color:var(--acc); box-shadow:0 0 0 4px rgba(56,189,248,.15); 
 
 /* موبايل */
 @media (max-width:700px){
-  .form{grid-template-columns:1fr}
-  .loan-row{grid-template-columns:1fr 1fr}
-  .drow{grid-template-columns:1fr 1fr}
+  .form, .row2{grid-template-columns:1fr}
   .big{font-size:32px}
   .topbar{padding:12px 16px}
 }
-
-/* إخفاء أسهم الأرقام */
-input[type=number]{-moz-appearance:textfield;appearance:textfield}
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="brand">💰 سلف الموظفين</div>
-  <div class="tabs">
-    <button class="tab active" data-tab="main" onclick="showTab('main')">تسجيل السلف</button>
-    <button class="tab" data-tab="details" onclick="showTab('details')">التفاصيل</button>
-    <button class="tab" data-tab="names" onclick="showTab('names')">الأسماء</button>
-  </div>
-</header>
+<!-- شاشة الدخول والتسجيل -->
+<div id="authScreen">
+  <div class="card auth-card">
+    <div class="brand auth-brand">💰 سلف الموظفين</div>
+    <h2 class="auth-title" id="authTitle">تسجيل الدخول</h2>
+    <p class="auth-sub" id="authSub">ادخل برقم موبايلك والباسورد</p>
 
-<div id="toasts"></div>
-
-<main>
-  <!-- تسجيل السلف -->
-  <section class="page active" id="page-main">
-    <div class="card clock">
-      <div id="clockDay"></div>
-      <div id="clockDate"></div>
-      <div id="clockTime" class="big"></div>
-    </div>
-
-    <form class="card form" onsubmit="submitLoan(event)">
+    <form id="loginForm" class="stack form-slide" onsubmit="doLogin(event)">
       <div>
-        <label>الاسم</label>
-        <div class="dd" id="loanDD">
-          <button type="button" class="dd-btn"><span class="dd-val ph">اختار الاسم</span><span class="dd-arrow">▼</span></button>
-          <div class="dd-menu"></div>
-        </div>
-        <input type="hidden" id="loanName">
+        <label>رقم الموبايل (اليوزر)</label>
+        <input id="lgPhone" type="tel" inputmode="numeric" autocomplete="username" required>
       </div>
       <div>
-        <label>رقم السلفة</label>
-        <input id="loanAmount" type="number" min="1" step="any">
+        <label>الباسورد</label>
+        <input id="lgPass" type="password" autocomplete="current-password" required>
       </div>
-      <div class="full">
-        <label>الملاحظات</label>
-        <input id="loanNotes" placeholder="اختياري" autocomplete="off">
-      </div>
-      <div class="full">
-        <button id="saveBtn" class="primary" type="submit">سجّل السلفة</button>
-      </div>
+      <button id="lgBtn" class="primary" type="submit">دخول</button>
+      <button type="button" class="link-btn" onclick="showAuth('register')">ليس لدي حساب</button>
     </form>
 
-    <div class="card">
-      <div class="card-head">
-        <h3 id="monthTitle">...</h3>
-        <span>الإجمالي: <b id="monthTotal">0</b></span>
+    <form id="registerForm" class="stack hidden" onsubmit="doRegister(event)">
+      <div>
+        <label>الاسم</label>
+        <input id="rgName" required>
       </div>
-      <div id="loanList"></div>
-    </div>
-  </section>
+      <div>
+        <label>رقم الموبايل (اليوزر)</label>
+        <input id="rgPhone" type="tel" inputmode="numeric" required>
+      </div>
+      <div>
+        <label>الباسورد</label>
+        <input id="rgPass" type="password" required>
+      </div>
+      <button id="rgBtn" class="primary" type="submit">تنفيذ</button>
+      <button type="button" class="link-btn" onclick="showAuth('login')">عندي حساب بالفعل</button>
+    </form>
+  </div>
+</div>
 
-  <!-- التفاصيل -->
-  <section class="page" id="page-details">
-    <div class="card picker">
-      <label style="color:var(--muted)">اختار الاسم:</label>
-      <div class="dd" id="detailDD">
-        <button type="button" class="dd-btn"><span class="dd-val ph">اختار الاسم</span><span class="dd-arrow">▼</span></button>
-        <div class="dd-menu"></div>
-      </div>
-      <input type="hidden" id="detailName">
+<!-- التطبيق بعد الدخول -->
+<div id="appScreen" class="hidden">
+  <header class="topbar">
+    <div class="brand">💰 سلف الموظفين</div>
+    <div class="tabs">
+      <button class="tab admin-only active" data-tab="main" onclick="showTab('main')">تسجيل السلف</button>
+      <button class="tab admin-only" data-tab="details" onclick="showTab('details')">التفاصيل</button>
+      <button class="tab admin-only" data-tab="requests" onclick="showTab('requests')">الطلبات</button>
+      <button class="tab admin-only" data-tab="names" onclick="showTab('names')">الأسماء</button>
+      <button class="tab emp-only" data-tab="me" onclick="showTab('me')">سلفي</button>
     </div>
-    <div id="detailResult"></div>
-  </section>
+    <div class="user-chip">
+      <div>
+        <div class="user-name" id="userName"></div>
+        <span class="role-tag" id="userRole"></span>
+      </div>
+      <button class="logout" onclick="logout()">خروج</button>
+    </div>
+  </header>
 
-  <!-- الأسماء -->
-  <section class="page" id="page-names">
-    <div class="card">
-      <h3 class="sec-title">كل الأسماء</h3>
-      <div id="namesList"></div>
-    </div>
-    <div class="card">
-      <h3 class="sec-title">إضافة اسم جديد</h3>
-      <div class="add-row">
-        <input id="newName" placeholder="اكتب الاسم" autocomplete="off" onkeydown="if(event.key==='Enter')submitName()">
-        <button class="small" onclick="submitName()">＋ إضافة</button>
+  <div id="toasts"></div>
+
+  <main>
+    <!-- الأدمن: تسجيل السلف -->
+    <section class="page active admin-only" id="page-main">
+      <div class="card clock">
+        <div id="clockDay"></div>
+        <div id="clockDate"></div>
+        <div id="clockTime" class="big"></div>
       </div>
-    </div>
-  </section>
-</main>
+
+      <form class="card form" onsubmit="submitLoan(event)">
+        <div>
+          <label>الاسم</label>
+          <div class="dd" id="loanDD"></div>
+        </div>
+        <div>
+          <label>رقم السلفة</label>
+          <input id="loanAmount" type="number" min="1" step="any">
+        </div>
+        <div class="full">
+          <label>الملاحظات</label>
+          <input id="loanNotes" placeholder="اختياري" autocomplete="off">
+        </div>
+        <div class="full">
+          <button id="saveBtn" class="primary" type="submit">سجّل السلفة</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-head">
+          <h3 id="monthTitle">...</h3>
+          <span>الإجمالي: <b id="monthTotal">0</b></span>
+        </div>
+        <div id="loanList"></div>
+      </div>
+    </section>
+
+    <!-- الأدمن: التفاصيل -->
+    <section class="page admin-only" id="page-details">
+      <div class="card picker">
+        <label class="muted">اختار الاسم:</label>
+        <div class="dd" id="detailDD"></div>
+      </div>
+      <div id="detailResult"></div>
+    </section>
+
+    <!-- الأدمن: الطلبات -->
+    <section class="page admin-only" id="page-requests">
+      <div class="card">
+        <h3 class="sec-title">طلبات السلف</h3>
+        <div id="requestsList"></div>
+      </div>
+    </section>
+
+    <!-- الأدمن: الأسماء -->
+    <section class="page admin-only" id="page-names">
+      <div class="card">
+        <h3 class="sec-title">كل الأسماء</h3>
+        <div id="namesList"></div>
+      </div>
+      <div class="card">
+        <h3 class="sec-title">إضافة اسم جديد</h3>
+        <div class="add-row">
+          <input id="newName" placeholder="اكتب الاسم" autocomplete="off" onkeydown="if(event.key==='Enter')submitName()">
+          <button class="small" onclick="submitName()">＋ إضافة</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- الموظف: سلفي -->
+    <section class="page emp-only" id="page-me">
+      <button class="small toggle-form" onclick="toggleMyForm()">＋ إضافة سلفة</button>
+
+      <div class="card hidden" id="myForm">
+        <h3 class="sec-title">طلب سلفة</h3>
+        <form class="stack" onsubmit="submitMyLoan(event)">
+          <div>
+            <label>المبلغ</label>
+            <input id="myAmount" type="number" min="1" step="any" required>
+          </div>
+          <div class="row2">
+            <div>
+              <label>رقم تليفونك</label>
+              <input id="myPhone" type="tel" inputmode="numeric" required>
+            </div>
+            <div>
+              <label>طريقة الاستلام</label>
+              <div class="dd" id="myMethodDD"></div>
+            </div>
+          </div>
+          <button id="myBtn" class="primary" type="submit">إرسال الطلب</button>
+        </form>
+      </div>
+
+      <div id="myResult"></div>
+    </section>
+  </main>
+</div>
 
 <script>
 /* ⬇️ حط هنا رابط الـ Web app بتاعك (/exec) */
 const API_URL = 'https://script.google.com/macros/s/AKfycbyVryYDMSeSo7vvJNOyamVjRut5-A84WMhYa8J5s-UpVrsOM-eh4WE9Vw95H1yJYdDWMQ/exec';
 
+const SESSION_KEY = 'salfSession';
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const PAY_METHODS = ['نقدي','انستا باي','فودافون كاش'];
+const ST_PEND = 'معلقة';
+const ST_DONE = 'تم';
 let names = [];
 let currentMonth = '';
 
+/* ----- أدوات ----- */
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function fmt(n){ return Number(n).toLocaleString('en-US'); }
 function esc(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function setBusy(btn, on){ btn.disabled = on; btn.classList.toggle('loading', on); }
 
 function toast(msg, type){
   const t = document.createElement('div');
@@ -328,6 +449,7 @@ function showErr(err){
 }
 
 function countUp(el, target){
+  if (!el) return;
   const start = performance.now(), dur = 900;
   function step(t){
     const p = Math.min((t - start) / dur, 1);
@@ -344,9 +466,21 @@ function tick(){
   $('clockTime').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
+/* ----- الجلسة ----- */
+function getSession(){
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e){ return null; }
+}
+function saveSession(s){ localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function logout(){
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
 /* ----- الاتصال بالـ Apps Script ----- */
-function api(action, params = {}){
+function api(action, params = {}, creds = null){
+  const s = creds || getSession();
   const q = new URLSearchParams({ action, ...params });
+  if (s && action !== 'register') { q.set('u', s.u); q.set('p', s.p); }
   return fetch(API_URL + '?' + q.toString())
     .then(r => r.json())
     .then(j => {
@@ -355,49 +489,43 @@ function api(action, params = {}){
     });
 }
 
-/* ----- الدروب داون المخصص ----- */
-function fillDropdown(dd, list){
-  const menu = dd.querySelector('.dd-menu');
-  const hidden = dd.hidden_;
-  const val = dd.querySelector('.dd-val');
-  menu.innerHTML = list.map((n, i) =>
-    `<div class="dd-item" style="--i:${i}" data-value="${esc(n)}">${esc(n)}</div>`
+/* ----- الدروب داون ----- */
+const dds = {};
+function initDD(id, placeholder, onPick){
+  const el = $(id);
+  el.innerHTML = `
+    <button type="button" class="dd-btn"><span class="dd-val ph">${esc(placeholder)}</span><span class="dd-arrow">▼</span></button>
+    <div class="dd-menu"></div>`;
+  dds[id] = { value: '', placeholder, onPick, el };
+  el.querySelector('.dd-btn').onclick = e => {
+    e.stopPropagation();
+    document.querySelectorAll('.dd.open').forEach(d => { if (d !== el) d.classList.remove('open'); });
+    el.classList.toggle('open');
+  };
+}
+function ddSetItems(id, items){
+  const st = dds[id];
+  if (!st) return;
+  if (!items.includes(st.value)) st.value = '';
+  const val = st.el.querySelector('.dd-val');
+  const menu = st.el.querySelector('.dd-menu');
+  val.textContent = st.value || st.placeholder;
+  val.classList.toggle('ph', !st.value);
+  menu.innerHTML = items.map((n, i) =>
+    `<div class="dd-item${n === st.value ? ' sel' : ''}" style="--i:${i}" data-value="${esc(n)}">${esc(n)}</div>`
   ).join('');
-
-  if (!list.includes(hidden.value)) {
-    hidden.value = '';
-    val.textContent = 'اختار الاسم';
-    val.classList.add('ph');
-  } else {
-    val.textContent = hidden.value;
-    val.classList.remove('ph');
-  }
-
   menu.querySelectorAll('.dd-item').forEach(it => {
-    if (it.dataset.value === hidden.value) it.classList.add('sel');
     it.onclick = e => {
       e.stopPropagation();
-      hidden.value = it.dataset.value;
-      val.textContent = it.dataset.value;
-      val.classList.remove('ph');
-      menu.querySelectorAll('.dd-item').forEach(x => x.classList.remove('sel'));
-      it.classList.add('sel');
-      dd.classList.remove('open');
-      if (dd.onPick) dd.onPick(hidden.value);
+      st.value = it.dataset.value;
+      st.el.classList.remove('open');
+      ddSetItems(id, items);
+      if (st.onPick) st.onPick(st.value);
     };
   });
 }
-
-function setupDropdown(id, hiddenId, onPick){
-  const dd = $(id);
-  dd.hidden_ = $(hiddenId);
-  dd.onPick = onPick;
-  dd.querySelector('.dd-btn').onclick = e => {
-    e.stopPropagation();
-    document.querySelectorAll('.dd.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
-    dd.classList.toggle('open');
-  };
-}
+function ddGet(id){ return dds[id] ? dds[id].value : ''; }
+function ddReset(id){ if (dds[id]) dds[id].value = ''; }
 
 document.addEventListener('click', () => {
   document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
@@ -406,23 +534,176 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
 });
 
+/* ----- الدخول والتسجيل ----- */
+function showAuth(mode){
+  $('loginForm').classList.toggle('hidden', mode !== 'login');
+  $('registerForm').classList.toggle('hidden', mode !== 'register');
+  $('authTitle').textContent = mode === 'login' ? 'تسجيل الدخول' : 'حساب جديد';
+  $('authSub').textContent = mode === 'login' ? 'ادخل برقم موبايلك والباسورد' : 'اكتب اسمك ورقمك والباسورد';
+  const f = $(mode === 'login' ? 'loginForm' : 'registerForm');
+  f.classList.remove('form-slide'); void f.offsetWidth; f.classList.add('form-slide');
+}
+
+function doLogin(e){
+  e.preventDefault();
+  const u = $('lgPhone').value.trim(), p = $('lgPass').value;
+  const btn = $('lgBtn');
+  setBusy(btn, true);
+  api('login', {}, { u, p })
+    .then(user => {
+      saveSession({ u, p, name: user.name, role: user.role });
+      enterApp();
+    })
+    .catch(showErr)
+    .finally(() => setBusy(btn, false));
+}
+
+function doRegister(e){
+  e.preventDefault();
+  const name = $('rgName').value.trim();
+  const phone = $('rgPhone').value.trim();
+  const pass = $('rgPass').value;
+  const btn = $('rgBtn');
+  setBusy(btn, true);
+  api('register', { name, phone, pass })
+    .then(() => {
+      toast('اتسجل حسابك ✅ ادخل بالرقم والباسورد', 'ok');
+      $('lgPhone').value = phone;
+      $('lgPass').value = '';
+      $('rgName').value = ''; $('rgPhone').value = ''; $('rgPass').value = '';
+      showAuth('login');
+    })
+    .catch(showErr)
+    .finally(() => setBusy(btn, false));
+}
+
+function enterApp(){
+  const s = getSession();
+  const isAdmin = s.role === 'admin';
+  $('authScreen').classList.add('hidden');
+  $('appScreen').classList.remove('hidden');
+  $('userName').textContent = s.name;
+  $('userRole').textContent = isAdmin ? 'أدمن' : 'موظف';
+  document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
+  document.querySelectorAll('.emp-only').forEach(el => el.classList.toggle('hidden', isAdmin));
+  if (isAdmin){
+    loadNames();
+    showTab('main');
+  } else {
+    ddSetItems('myMethodDD', PAY_METHODS);
+    showTab('me');
+  }
+}
+
 /* ----- الصفحات ----- */
 function showTab(name){
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+  if (name === 'main') loadMonth();
   if (name === 'details') loadDetails();
+  if (name === 'requests') loadRequests();
+  if (name === 'names') renderNamesList();
+  if (name === 'me') loadMyDetails();
 }
 
-/* ----- الأسماء ----- */
-function setNames(list){
-  names = list;
-  fillDropdown($('loanDD'), names);
-  fillDropdown($('detailDD'), names);
-  renderNamesList();
+/* ----- بلوكات السلف (مشتركة) ----- */
+function loanRowHTML(r, i, opts = {}){
+  const st = r.status || '';
+  const cls = st === ST_PEND ? 'pend' : st === ST_DONE ? 'done' : '';
+  const badge = st === ST_PEND ? '<span class="badge pend">معلقة</span>'
+              : st === ST_DONE ? '<span class="badge done">تم ✅</span>' : '';
+  const name = opts.showName ? `<b>${esc(r.name)}</b> · ` : '';
+  const notes = r.notes ? ` <span class="ln-notes">· ${esc(r.notes)}</span>` : '';
+  const meta = [`${esc(r.day)} ${esc(r.date)} · ${esc(r.time)}`];
+  if (r.method) meta.push(esc(r.method));
+  if (r.phone) meta.push('📞 ' + esc(r.phone));
+  return `
+    <div class="ln ${cls}" style="animation-delay:${i * 50}ms">
+      <div class="ln-main">${name}<b class="ln-amt">${fmt(r.amount)}</b>${notes}</div>
+      <div class="ln-actions">${badge}${opts.actions || ''}</div>
+      <div class="ln-meta">${meta.join(' · ')}</div>
+    </div>`;
 }
 
+function grandHTML(d){
+  const pend = d.months.reduce((s, m) =>
+    s + m.rows.filter(r => r.status === ST_PEND).reduce((a, r) => a + r.amount, 0), 0);
+  return `
+    <div class="card grand">
+      <div class="muted">إجمالي سلف ${esc(d.name)}</div>
+      <div class="big">0</div>
+      ${pend ? `<div class="pend-sum">معلق: ${fmt(pend)}</div>` : ''}
+    </div>`;
+}
+
+function monthCardHTML(m, i){
+  return `
+    <div class="card" style="animation-delay:${i * 120}ms">
+      <div class="mh"><span>${esc(m.month)}</span><span class="mt">${fmt(m.total)}</span></div>
+      ${m.rows.map((r, j) => loanRowHTML(r, j)).join('')}
+    </div>`;
+}
+
+function renderBlock(box, d, emptyMsg){
+  if (!d.months.length){
+    box.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+    return;
+  }
+  box.innerHTML = grandHTML(d) + d.months.map(monthCardHTML).join('');
+  countUp(box.querySelector('.grand .big'), d.grandTotal);
+}
+
+/* ----- الموظف ----- */
+function toggleMyForm(){
+  const f = $('myForm');
+  const willShow = f.classList.contains('hidden');
+  f.classList.toggle('hidden', !willShow);
+  if (willShow){ f.classList.remove('form-slide'); void f.offsetWidth; f.classList.add('form-slide'); }
+}
+
+function loadMyDetails(){
+  const box = $('myResult');
+  box.innerHTML = '<div class="spinner"></div>';
+  api('myDetails')
+    .then(d => renderBlock(box, d, 'مفيش سلف مسجلة ليك لسه 🌙'))
+    .catch(showErr);
+}
+
+function submitMyLoan(e){
+  e.preventDefault();
+  const amount = $('myAmount').value;
+  const phone = $('myPhone').value.trim();
+  const method = ddGet('myMethodDD');
+  if (!amount || Number(amount) <= 0) return toast('اكتب مبلغ صحيح', 'err');
+  if (!phone) return toast('اكتب رقم تليفونك', 'err');
+  if (!method) return toast('اختار طريقة الاستلام', 'err');
+
+  const btn = $('myBtn');
+  setBusy(btn, true);
+  api('requestLoan', { amount, phone, method })
+    .then(() => {
+      $('myAmount').value = '';
+      $('myPhone').value = '';
+      ddReset('myMethodDD');
+      ddSetItems('myMethodDD', PAY_METHODS);
+      toast('اتبعتت السلفة ✅ مستنية الأدمن', 'ok');
+      $('myForm').classList.add('hidden');
+      loadMyDetails();
+    })
+    .catch(showErr)
+    .finally(() => setBusy(btn, false));
+}
+
+/* ----- الأدمن: الأسماء ----- */
 function loadNames(){
   api('names').then(setNames).catch(showErr);
+}
+
+function setNames(list){
+  names = list;
+  ddSetItems('loanDD', names);
+  ddSetItems('detailDD', names);
+  renderNamesList();
 }
 
 function renderNamesList(){
@@ -432,7 +713,7 @@ function renderNamesList(){
     return;
   }
   box.innerHTML = names.map((n, i) => `
-    <div class="name-row" style="animation-delay:${i*50}ms">
+    <div class="name-row" style="animation-delay:${i * 50}ms">
       <span class="nr-name">${esc(n)}</span>
       <button class="trash" data-name="${esc(n)}" title="امسح">🗑️</button>
     </div>`).join('');
@@ -469,52 +750,40 @@ function removeName(name, rowEl){
     });
 }
 
-/* ----- السلف الشهرية ----- */
+/* ----- الأدمن: تسجيل السلف ----- */
 function loadMonth(){
   api('month')
     .then(data => {
       currentMonth = data.month;
       $('monthTitle').textContent = data.month;
-      renderLoans(data.rows);
+      renderMonth(data.rows);
     })
     .catch(showErr);
 }
 
-function renderLoans(rows){
+function renderMonth(rows){
+  countUp($('monthTotal'), rows.reduce((s, r) => s + r.amount, 0));
   const box = $('loanList');
-  const total = rows.reduce((s, r) => s + r.amount, 0);
-  countUp($('monthTotal'), total);
-
   if (!rows.length){
     box.innerHTML = '<div class="empty">مفيش سلف في الشهر ده لسه 🌙</div>';
     return;
   }
-  const head = `
-    <div class="loan-row loan-head">
-      <div>الاسم</div><div>المبلغ</div><div>الملاحظات</div><div>التاريخ والوقت</div><div></div>
-    </div>`;
-  const body = rows.slice().reverse().map((r, i) => `
-    <div class="loan-row" style="animation-delay:${i*60}ms">
-      <div class="lr-name">${esc(r.name)}</div>
-      <div class="lr-amt">${fmt(r.amount)}</div>
-      <div class="lr-notes">${esc(r.notes) || '—'}</div>
-      <div class="lr-time">${esc(r.day)} ${esc(r.date)} · ${esc(r.time)}</div>
-      <button class="trash" title="امسح" onclick="removeLoan(${r.row}, this)">🗑️</button>
-    </div>`).join('');
-  box.innerHTML = head + body;
+  box.innerHTML = rows.slice().reverse().map((r, i) => loanRowHTML(r, i, {
+    showName: true,
+    actions: `<button class="trash" title="امسح" onclick="removeLoan(${r.row}, this)">🗑️</button>`
+  })).join('');
 }
 
 function submitLoan(e){
   e.preventDefault();
-  const name = $('loanName').value;
+  const name = ddGet('loanDD');
   const amount = $('loanAmount').value;
   const notes = $('loanNotes').value;
   if (!name){ toast('اختار الاسم الأول', 'err'); return; }
   if (!amount || Number(amount) <= 0){ toast('اكتب مبلغ صحيح', 'err'); return; }
 
   const btn = $('saveBtn');
-  btn.disabled = true; btn.classList.add('loading');
-
+  setBusy(btn, true);
   api('add', { name, amount, notes })
     .then(() => {
       $('loanAmount').value = '';
@@ -523,72 +792,74 @@ function submitLoan(e){
       loadMonth();
     })
     .catch(showErr)
-    .finally(() => {
-      btn.disabled = false; btn.classList.remove('loading');
-    });
+    .finally(() => setBusy(btn, false));
 }
 
 function removeLoan(row, btn){
   if (!confirm('متأكد إنك عايز تمسح السلفة دي؟')) return;
-  const rowEl = btn.closest('.loan-row');
+  const rowEl = btn.closest('.ln');
   rowEl.classList.add('removing');
   api('delete', { month: currentMonth, row })
     .then(() => { toast('اتمسحت 🗑️'); loadMonth(); })
     .catch(err => { rowEl.classList.remove('removing'); showErr(err); });
 }
 
-/* ----- التفاصيل ----- */
-function loadDetails(){
-  const n = $('detailName').value;
-  if (!n){
-    $('detailResult').innerHTML = '<div class="empty">اختار اسم عشان تشوف التفاصيل</div>';
-    return;
-  }
-  $('detailResult').innerHTML = '<div class="spinner"></div>';
-  api('details', { name: n })
-    .then(renderDetails)
+/* ----- الأدمن: الطلبات ----- */
+function loadRequests(){
+  const box = $('requestsList');
+  box.innerHTML = '<div class="spinner"></div>';
+  api('requests')
+    .then(rows => {
+      if (!rows.length){
+        box.innerHTML = '<div class="empty">مفيش طلبات لسه</div>';
+        return;
+      }
+      box.innerHTML = rows.map((r, i) => {
+        const btn = r.status === ST_PEND
+          ? `<button class="done-btn" onclick="markDone('${esc(r.month)}', ${r.row}, this)">تم ✓</button>`
+          : '';
+        return loanRowHTML(r, i, { showName: true, actions: btn });
+      }).join('');
+    })
     .catch(showErr);
 }
 
-function renderDetails(d){
-  if (!d.months.length){
-    $('detailResult').innerHTML = `<div class="empty">مفيش سلف مسجلة لـ ${esc(d.name)}</div>`;
+function markDone(month, row, btn){
+  btn.disabled = true;
+  api('done', { month, row })
+    .then(() => {
+      toast('اتعلّمت تم ✅', 'ok');
+      loadRequests();
+    })
+    .catch(err => {
+      btn.disabled = false;
+      showErr(err);
+    });
+}
+
+/* ----- الأدمن: التفاصيل ----- */
+function loadDetails(){
+  const n = ddGet('detailDD');
+  const box = $('detailResult');
+  if (!n){
+    box.innerHTML = '<div class="empty">اختار اسم عشان تشوف التفاصيل</div>';
     return;
   }
-  let html = `
-    <div class="card grand">
-      <div style="color:var(--muted)">إجمالي سلف ${esc(d.name)}</div>
-      <div class="big" id="grandNum">0</div>
-    </div>`;
-
-  d.months.forEach((m, i) => {
-    html += `
-    <div class="card" style="animation-delay:${i*120}ms">
-      <div class="mh"><span>${esc(m.month)}</span><span class="mt">${fmt(m.total)}</span></div>
-      <div class="drow drow-head">
-        <span>التاريخ</span><span>الوقت</span><span>المبلغ</span><span>الملاحظات</span>
-      </div>
-      ${m.rows.map(r => `
-        <div class="drow" style="animation-delay:${i*120 + 80}ms">
-          <span>${esc(r.day)} ${esc(r.date)}</span>
-          <span>${esc(r.time)}</span>
-          <span>${fmt(r.amount)}</span>
-          <span class="dn">${esc(r.notes) || '—'}</span>
-        </div>`).join('')}
-    </div>`;
-  });
-
-  $('detailResult').innerHTML = html;
-  countUp($('grandNum'), d.grandTotal);
+  box.innerHTML = '<div class="spinner"></div>';
+  api('details', { name: n })
+    .then(d => renderBlock(box, d, `مفيش سلف مسجلة لـ ${esc(d.name)}`))
+    .catch(showErr);
 }
 
 /* ----- تشغيل ----- */
-setupDropdown('loanDD', 'loanName', null);
-setupDropdown('detailDD', 'detailName', () => loadDetails());
+initDD('loanDD', 'اختار الاسم', null);
+initDD('detailDD', 'اختار الاسم', () => loadDetails());
+initDD('myMethodDD', 'اختار طريقة الاستلام', null);
 tick();
 setInterval(tick, 1000);
-loadNames();
-loadMonth();
+
+if (getSession()) enterApp();
+else showAuth('login');
 </script>
 </body>
 </html>
