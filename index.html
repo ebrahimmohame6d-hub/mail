@@ -73,12 +73,6 @@ body{
 .auth-sub{text-align:center; color:var(--muted); margin:0 0 20px; font-size:14px}
 .stack{display:flex; flex-direction:column; gap:14px}
 .stack label, .form label{font-size:14px; color:var(--muted); display:block; margin-bottom:6px}
-.link-btn{
-  background:none; border:0; color:var(--acc); cursor:pointer; font-family:inherit; font-size:14px;
-  text-decoration:underline; width:100%; padding:6px; transition:transform .2s;
-}
-.link-btn:hover{transform:translateY(-1px)}
-.form-slide{animation:fadeUp .4s ease both}
 
 /* الصفحات */
 main{max-width:980px; margin:24px auto; padding:0 16px}
@@ -222,18 +216,20 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 /* جدول اليوزرات (نفس شكل جدول الشهر) */
 .utable{display:flex; flex-direction:column}
 .urow{
-  display:grid; grid-template-columns:1.2fr 1.2fr 1fr .8fr; gap:10px; align-items:center;
+  display:grid; grid-template-columns:1.2fr 1.2fr 1fr .8fr auto; gap:10px; align-items:center;
   padding:12px 14px; border-radius:12px; margin-bottom:8px;
   background:rgba(255,255,255,.04); border:1px solid var(--line);
   animation:slideIn .4s ease both; transition:background .25s, border-color .25s, transform .25s;
 }
 .urow:hover{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.25); transform:translateX(-3px)}
+.urow.removing{animation:rowOut .35s ease forwards}
 .urow.uhead, .loan-head{
   background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
   font-weight:bold; color:var(--acc); animation:none;
 }
 .urow.uhead:hover{transform:none; background:rgba(56,189,248,.15)}
 .urow .pw{font-variant-numeric:tabular-nums; color:var(--muted)}
+.urow .lbl{display:none}
 
 /* التفاصيل */
 .picker{display:flex; gap:12px; align-items:center; margin-bottom:18px; flex-wrap:wrap}
@@ -274,22 +270,26 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 /* موبايل */
 @media (max-width:700px){
   .form, .row2{grid-template-columns:1fr}
-  .urow{grid-template-columns:1fr 1fr}
   .big{font-size:32px}
   .topbar{padding:12px 16px}
+  .urow.uhead{display:none}
+  .urow{grid-template-columns:1fr 1fr; gap:8px 12px}
+  .urow .lbl{display:block; font-size:12px; color:var(--muted); margin-bottom:2px}
+  .urow .trash{grid-column:1/-1; width:100%; height:40px}
+  .urow > div:not(.trash-cell){min-width:0; overflow-wrap:anywhere}
 }
 </style>
 </head>
 <body>
 
-<!-- شاشة الدخول والتسجيل -->
+<!-- شاشة الدخول -->
 <div id="authScreen">
   <div class="card auth-card">
     <div class="brand auth-brand">💰 سلف الموظفين</div>
-    <h2 class="auth-title" id="authTitle">تسجيل الدخول</h2>
-    <p class="auth-sub" id="authSub">ادخل برقم موبايلك والباسورد</p>
+    <h2 class="auth-title">تسجيل الدخول</h2>
+    <p class="auth-sub">ادخل برقم موبايلك والباسورد</p>
 
-    <form id="loginForm" class="stack form-slide" onsubmit="doLogin(event)">
+    <form class="stack form-slide" onsubmit="doLogin(event)">
       <div>
         <label>رقم الموبايل (اليوزر)</label>
         <input id="lgPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="username" required>
@@ -299,24 +299,6 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
         <input id="lgPass" type="password" autocomplete="current-password" required>
       </div>
       <button id="lgBtn" class="primary" type="submit">دخول</button>
-      <button type="button" class="link-btn" onclick="showAuth('register')">ليس لدي حساب</button>
-    </form>
-
-    <form id="registerForm" class="stack hidden" onsubmit="doRegister(event)">
-      <div>
-        <label>الاسم</label>
-        <input id="rgName" required>
-      </div>
-      <div>
-        <label>رقم الموبايل (اليوزر)</label>
-        <input id="rgPhone" type="tel" inputmode="numeric" maxlength="11" required>
-      </div>
-      <div>
-        <label>الباسورد</label>
-        <input id="rgPass" type="password" required>
-      </div>
-      <button id="rgBtn" class="primary" type="submit">تنفيذ</button>
-      <button type="button" class="link-btn" onclick="showAuth('login')">عندي حساب بالفعل</button>
     </form>
   </div>
 </div>
@@ -398,8 +380,29 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
       </div>
     </section>
 
-    <!-- الأدمن: اليوزرات -->
+    <!-- الأدمن: اليوزرات (إضافة + جدول + مسح) -->
     <section class="page admin-only" id="page-users">
+      <div class="card">
+        <h3 class="sec-title">إضافة يوزر جديد</h3>
+        <form class="stack" onsubmit="submitUser(event)">
+          <div class="row2">
+            <div>
+              <label>الاسم</label>
+              <input id="nuName" required autocomplete="off">
+            </div>
+            <div>
+              <label>رقم الموبايل (اليوزر)</label>
+              <input id="nuPhone" type="tel" inputmode="numeric" maxlength="11" required autocomplete="off">
+            </div>
+          </div>
+          <div>
+            <label>الباسورد</label>
+            <input id="nuPass" required autocomplete="off">
+          </div>
+          <button id="nuBtn" class="primary" type="submit">＋ إضافة اليوزر</button>
+        </form>
+      </div>
+
       <div class="card">
         <h3 class="sec-title">كل اليوزرات</h3>
         <div class="utable" id="usersList"></div>
@@ -513,7 +516,7 @@ function logout(){
 function api(action, params = {}, creds = null){
   const s = creds || getSession();
   const q = new URLSearchParams({ action, ...params });
-  if (s && action !== 'register') { q.set('u', s.u); q.set('p', s.p); }
+  if (s) { q.set('u', s.u); q.set('p', s.p); }
   return fetch(API_URL + '?' + q.toString())
     .then(r => r.json())
     .then(j => {
@@ -577,16 +580,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
 });
 
-/* ----- الدخول والتسجيل ----- */
-function showAuth(mode){
-  $('loginForm').classList.toggle('hidden', mode !== 'login');
-  $('registerForm').classList.toggle('hidden', mode !== 'register');
-  $('authTitle').textContent = mode === 'login' ? 'تسجيل الدخول' : 'حساب جديد';
-  $('authSub').textContent = mode === 'login' ? 'ادخل برقم موبايلك والباسورد' : 'اكتب اسمك ورقمك والباسورد';
-  const f = $(mode === 'login' ? 'loginForm' : 'registerForm');
-  f.classList.remove('form-slide'); void f.offsetWidth; f.classList.add('form-slide');
-}
-
+/* ----- الدخول ----- */
 function doLogin(e){
   e.preventDefault();
   const u = $('lgPhone').value.trim(), p = $('lgPass').value;
@@ -597,26 +591,6 @@ function doLogin(e){
     .then(user => {
       saveSession({ u, p, name: user.name, role: user.role });
       enterApp();
-    })
-    .catch(showErr)
-    .finally(() => setBusy(btn, false));
-}
-
-function doRegister(e){
-  e.preventDefault();
-  const name = $('rgName').value.trim();
-  const phone = $('rgPhone').value.trim();
-  const pass = $('rgPass').value;
-  if (!/^\d{11}$/.test(phone)) return toast('لازم رقم الموبايل يكون 11 رقم بس', 'err');
-  const btn = $('rgBtn');
-  setBusy(btn, true);
-  api('register', { name, phone, pass })
-    .then(() => {
-      toast('اتسجل حسابك ✅ ادخل بالرقم والباسورد', 'ok');
-      $('lgPhone').value = phone;
-      $('lgPass').value = '';
-      $('rgName').value = ''; $('rgPhone').value = ''; $('rgPass').value = '';
-      showAuth('login');
     })
     .catch(showErr)
     .finally(() => setBusy(btn, false));
@@ -677,7 +651,7 @@ function refreshNow(){
     .finally(() => b.classList.remove('busy'));
 }
 
-/* تحديث تلقائي كل 8 ثواني لكل المستخدمين */
+/* تحديث تلقائي كل 8 ثواني */
 setInterval(() => {
   const s = getSession();
   if (!s || document.hidden || $('appScreen').classList.contains('hidden')) return;
@@ -890,7 +864,30 @@ function setStatus(month, row, act, btn){
     });
 }
 
-/* ----- الأدمن: اليوزرات ----- */
+/* ----- الأدمن: اليوزرات (إضافة + جدول + مسح) ----- */
+function submitUser(e){
+  e.preventDefault();
+  const name = $('nuName').value.trim();
+  const phone = $('nuPhone').value.trim();
+  const pass = $('nuPass').value;
+  if (!/^\d{11}$/.test(phone)) return toast('لازم رقم الموبايل يكون 11 رقم بس', 'err');
+  if (pass.length < 4) return toast('الباسورد لازم يكون 4 حروف على الأقل', 'err');
+  const btn = $('nuBtn');
+  setBusy(btn, true);
+  api('addUser', { name, phone, pass })
+    .then(list => {
+      $('nuName').value = '';
+      $('nuPhone').value = '';
+      $('nuPass').value = '';
+      toast('اتضاف اليوزر ✅', 'ok');
+      cache['users'] = JSON.stringify(list);
+      renderUsers(list);
+      loadNames(true);
+    })
+    .catch(showErr)
+    .finally(() => setBusy(btn, false));
+}
+
 function renderUsers(list){
   const box = $('usersList');
   if (!list.length){
@@ -899,15 +896,42 @@ function renderUsers(list){
   }
   box.innerHTML = `
     <div class="urow uhead">
-      <div>الاسم</div><div>اليوزر (الموبايل)</div><div>الباسورد</div><div>الدور</div>
+      <div>الاسم</div><div>اليوزر (الموبايل)</div><div>الباسورد</div><div>الدور</div><div></div>
     </div>` +
-    list.map((u, i) => `
-      <div class="urow" style="animation-delay:${i * 50}ms">
-        <div><b>${esc(u.name)}</b></div>
-        <div>${esc(u.username)}</div>
-        <div class="pw">${esc(u.password)}</div>
-        <div><span class="role-tag">${u.role === 'admin' ? 'أدمن' : 'موظف'}</span></div>
-      </div>`).join('');
+    list.map((u, i) => {
+      const del = u.role === 'admin'
+        ? '<div></div>'
+        : `<button class="trash" title="امسح" data-phone="${esc(u.username)}">🗑️</button>`;
+      return `
+      <div class="urow" style="animation-delay:${i * 50}ms" data-u="${esc(u.username)}">
+        <div><span class="lbl">الاسم</span><b>${esc(u.name)}</b></div>
+        <div><span class="lbl">اليوزر</span>${esc(u.username)}</div>
+        <div><span class="lbl">الباسورد</span><span class="pw">${esc(u.password)}</span></div>
+        <div><span class="lbl">الدور</span><span class="role-tag">${u.role === 'admin' ? 'أدمن' : 'موظف'}</span></div>
+        ${del}
+      </div>`;
+    }).join('');
+
+  box.querySelectorAll('.trash[data-phone]').forEach(b => {
+    b.onclick = () => removeUser(b.dataset.phone, b.closest('.urow'));
+  });
+}
+
+function removeUser(phone, rowEl){
+  if (!confirm('متأكد إنك عايز تمسح اليوزر ده؟')) return;
+  rowEl.classList.add('removing');
+  api('deleteUser', { phone })
+    .then(list => {
+      setTimeout(() => {
+        cache['users'] = JSON.stringify(list);
+        renderUsers(list);
+        toast('اتمسح اليوزر 🗑️');
+      }, 300);
+    })
+    .catch(err => {
+      rowEl.classList.remove('removing');
+      showErr(err);
+    });
 }
 
 /* ----- الأدمن: التفاصيل ----- */
@@ -932,7 +956,6 @@ tick();
 setInterval(tick, 1000);
 
 if (getSession()) enterApp();
-else showAuth('login');
 </script>
 </body>
 </html>
