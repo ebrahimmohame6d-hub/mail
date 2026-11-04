@@ -583,8 +583,8 @@ function doLogin(e){
       enterApp();
     })
     .catch(err => {
-      const m = (err && err.message) || 'حصل خطأ';
-      if (m.indexOf('الباسورد') !== -1) {
+      const m = (err && err.message) || '';
+      if (m === 'الباسورد غلط') {
         msgEl.textContent = 'الباسورد غلط';
         inp.classList.add('bad');
         inp.value = '';
