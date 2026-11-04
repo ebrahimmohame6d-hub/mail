@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سلف الموظفين</title>
+<title>سلف المناديب</title>
 <style>
 :root{
   --bg1:#0f172a; --bg2:#1e1b4b;
@@ -65,7 +65,7 @@ body{
 .refresh:active{transform:scale(.9)}
 .refresh.busy{animation:spin .7s linear infinite}
 
-/* المربع الصغير للساعة (شمال الشاشة) */
+/* المربع الصغير للساعة */
 .mini-clock{
   position:fixed; top:100px; left:14px; z-index:40; width:150px; padding:10px 12px;
   text-align:center; background:rgba(15,23,42,.75); backdrop-filter:blur(10px);
@@ -222,7 +222,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 
 .empty{text-align:center; color:var(--muted); padding:30px 10px; animation:pop .5s ease both}
 
-/* جدول اليوزرات */
+/* جدول المناديب */
 .utable{display:flex; flex-direction:column}
 .urow{
   display:grid; grid-template-columns:1.2fr 1.2fr 1fr .8fr auto; gap:10px; align-items:center;
@@ -232,7 +232,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 }
 .urow:hover{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.25); transform:translateX(-3px)}
 .urow.removing{animation:rowOut .35s ease forwards}
-.urow.uhead, .loan-head{
+.urow.uhead{
   background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
   font-weight:bold; color:var(--acc); animation:none;
 }
@@ -287,7 +287,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 <!-- شاشة الدخول -->
 <div id="authScreen">
   <div class="card auth-card">
-    <div class="brand auth-brand">💰 سلف الموظفين</div>
+    <div class="brand auth-brand">💰 سلف المناديب</div>
     <h2 class="auth-title">تسجيل الدخول</h2>
     <p class="auth-sub">ادخل برقم موبايلك والباسورد</p>
 
@@ -308,7 +308,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
 <!-- التطبيق بعد الدخول -->
 <div id="appScreen" class="hidden">
   <header class="topbar">
-    <div class="brand">💰 سلف الموظفين</div>
+    <div class="brand">💰 سلف المناديب</div>
     <div class="tabs">
       <button class="tab admin-only active" data-tab="main" onclick="showTab('main')">تسجيل السلف</button>
       <button class="tab admin-only" data-tab="details" onclick="showTab('details')">التفاصيل</button>
@@ -326,7 +326,6 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
     </div>
   </header>
 
-  <!-- المربع الصغير للساعة -->
   <div class="mini-clock" id="miniClock">
     <div id="clockDay"></div>
     <div id="clockDate"></div>
@@ -367,7 +366,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
     <!-- الأدمن: اليوزرات -->
     <section class="page admin-only" id="page-users">
       <div class="card">
-        <h3 class="sec-title">إضافة يوزر جديد</h3>
+        <h3 class="sec-title">إضافة مندوب جديد</h3>
         <form class="stack" onsubmit="submitUser(event)">
           <div class="row2">
             <div>
@@ -383,17 +382,17 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
             <label>الباسورد</label>
             <input id="nuPass" required autocomplete="off">
           </div>
-          <button id="nuBtn" class="primary" type="submit">＋ إضافة اليوزر</button>
+          <button id="nuBtn" class="primary" type="submit">＋ إضافة المندوب</button>
         </form>
       </div>
 
       <div class="card">
-        <h3 class="sec-title">كل اليوزرات</h3>
+        <h3 class="sec-title">كل المناديب</h3>
         <div class="utable" id="usersList"></div>
       </div>
     </section>
 
-    <!-- الموظف: سلفي -->
+    <!-- المندوب: سلفي -->
     <section class="page emp-only" id="page-me">
       <button class="small toggle-form" onclick="toggleMyForm()">＋ إضافة سلفة</button>
 
@@ -509,7 +508,7 @@ function api(action, params = {}, creds = null){
     });
 }
 
-/* تحميل صفحة مع مقارنة: بيرسم بس لو البيانات اتغيرت (إلا لو force) */
+/* تحميل صفحة: بيرسم بس لو البيانات اتغيرت (إلا لو force) */
 function fetchView(key, action, params, render, force){
   return api(action, params).then(data => {
     const s = JSON.stringify(data);
@@ -586,7 +585,7 @@ function enterApp(){
   $('authScreen').classList.add('hidden');
   $('appScreen').classList.remove('hidden');
   $('userName').textContent = s.name;
-  $('userRole').textContent = isAdmin ? 'أدمن' : 'موظف';
+  $('userRole').textContent = isAdmin ? 'أدمن' : 'مندوب';
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
   document.querySelectorAll('.emp-only').forEach(el => el.classList.toggle('hidden', isAdmin));
   if (isAdmin){
@@ -691,7 +690,7 @@ function renderBlock(box, d, emptyMsg){
   countUp(box.querySelector('.grand .big'), d.grandTotal);
 }
 
-/* ----- الموظف ----- */
+/* ----- المندوب ----- */
 function toggleMyForm(){
   const f = $('myForm');
   const willShow = f.classList.contains('hidden');
@@ -699,7 +698,6 @@ function toggleMyForm(){
   if (willShow){ f.classList.remove('form-slide'); void f.offsetWidth; f.classList.add('form-slide'); }
 }
 
-/* التحقق اللحظي من رقم التليفون أثناء الكتابة */
 $('myPhone').addEventListener('input', () => {
   const el = $('myPhone');
   el.value = el.value.replace(/\D/g, '').slice(0, 11);
@@ -740,7 +738,7 @@ function submitMyLoan(e){
     .finally(() => setBusy(btn, false));
 }
 
-/* ----- الأسماء (بتتستخدم في التفاصيل بس) ----- */
+/* ----- الأسماء (بتتستخدم في التفاصيل) ----- */
 function loadNames(force){
   return fetchView('names', 'names', {}, setNames, force);
 }
@@ -807,7 +805,7 @@ function setStatus(month, row, act, btn){
     });
 }
 
-/* ----- الأدمن: اليوزرات ----- */
+/* ----- الأدمن: المناديب ----- */
 function submitUser(e){
   e.preventDefault();
   const name = $('nuName').value.trim();
@@ -823,7 +821,7 @@ function submitUser(e){
       $('nuName').value = '';
       $('nuPhone').value = '';
       $('nuPass').value = '';
-      toast('اتضاف اليوزر ✅', 'ok');
+      toast('اتضاف المندوب ✅', 'ok');
       cache['users'] = JSON.stringify(list);
       renderUsers(list);
       loadNames(true);
@@ -835,7 +833,7 @@ function submitUser(e){
 function renderUsers(list){
   const box = $('usersList');
   if (!list.length){
-    box.innerHTML = '<div class="empty">مفيش يوزرات لسه</div>';
+    box.innerHTML = '<div class="empty">مفيش مناديب لسه</div>';
     return;
   }
   box.innerHTML = `
@@ -851,7 +849,7 @@ function renderUsers(list){
         <div><span class="lbl">الاسم</span><b>${esc(u.name)}</b></div>
         <div><span class="lbl">اليوزر</span>${esc(u.username)}</div>
         <div><span class="lbl">الباسورد</span><span class="pw">${esc(u.password)}</span></div>
-        <div><span class="lbl">الدور</span><span class="role-tag">${u.role === 'admin' ? 'أدمن' : 'موظف'}</span></div>
+        <div><span class="lbl">الدور</span><span class="role-tag">${u.role === 'admin' ? 'أدمن' : 'مندوب'}</span></div>
         ${del}
       </div>`;
     }).join('');
@@ -862,14 +860,16 @@ function renderUsers(list){
 }
 
 function removeUser(phone, rowEl){
-  if (!confirm('متأكد إنك عايز تمسح اليوزر ده؟')) return;
+  if (!confirm('متأكد إنك عايز تمسح المندوب ده وكل سلفه من كل الشيتات؟')) return;
   rowEl.classList.add('removing');
   api('deleteUser', { phone })
     .then(list => {
       setTimeout(() => {
         cache['users'] = JSON.stringify(list);
         renderUsers(list);
-        toast('اتمسح اليوزر 🗑️');
+        loadNames(true);
+        loadCurrent(true);
+        toast('اتمسح المندوب من كل حتة 🗑️');
       }, 300);
     })
     .catch(err => {
